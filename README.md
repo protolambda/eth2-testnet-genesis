@@ -52,6 +52,6 @@ The `mnemonics.yaml` is formatted as:
 
 The output will be:
 - `genesis.ssz`: a state to start the network with
-- `tranches`: a dir with files for each mnemonic, listing all pubkeys (1 per line).
+- `tranches`: a dir with text files for each mnemonic, listing all pubkeys (1 per line).
   Useful for to check if keystores are generated correctly before genesis, and to track the validators.
 

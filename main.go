@@ -52,6 +52,9 @@ func main() {
 	var eth1Hash beacon.Root
 	check(eth1Hash.UnmarshalText([]byte(*eth1BlockHashStr)))
 
+	t := beacon.Timestamp(*eth1BlockTimestamp) + spec.GENESIS_DELAY
+	fmt.Printf("genesis at %d + %d = %d  (%s)\n", *eth1BlockTimestamp, spec.GENESIS_DELAY, t, time.Unix(int64(t), 0).String())
+
 	mnemonics, err := loadMnemonics(*mnemonicsSrcFilePath)
 	check(err)
 
@@ -90,7 +93,7 @@ func main() {
 			validators = append(validators, data)
 		}
 		fmt.Println("Writing pubkeys list file...")
-		check(outputPubkeys(filepath.Join(*tranchesDir, fmt.Sprintf("tranche_%d", m)), pubs))
+		check(outputPubkeys(filepath.Join(*tranchesDir, fmt.Sprintf("tranche_%04d.txt", m)), pubs))
 	}
 	if uint64(len(validators)) < spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT {
 		fmt.Printf("WARNING: not enough validators for genesis. Key sources sum up to %d total. But need %d.\n", len(validators), spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT)
@@ -100,9 +103,7 @@ func main() {
 	check(err)
 
 	// Set the genesis time as if it was exactly on the configured delay after the eth1 block hash
-	t := beacon.Timestamp(*eth1BlockTimestamp) + spec.GENESIS_DELAY
 	check(state.SetGenesisTime(t))
-	fmt.Printf("genesis at %d + %d = %d  (%s)\n", *eth1BlockTimestamp, spec.GENESIS_DELAY, t, time.Unix(int64(t), 0).String())
 
 	// Overwrite state eth1 data to have an empty deposit tree at the starting eth1 block
 	eth1Dat := beacon.Eth1Data{
