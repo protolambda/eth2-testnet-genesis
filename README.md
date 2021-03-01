@@ -55,3 +55,15 @@ The output will be:
 - `tranches`: a dir with text files for each mnemonic, listing all pubkeys (1 per line).
   Useful for to check if keystores are generated correctly before genesis, and to track the validators.
 
+## Computing extra details
+
+To get info such as fork digest, genesis validators root, etc. run the `compute_genesis_details.py` script.
+Install dependencies with (use of a `venv` recommended):
+```
+pip install milagro-bls-binding==1.6.3 eth2spec==1.0.0
+```
+
+## License
+
+MIT. See [`LICENSE`](./LICENSE) file.
+

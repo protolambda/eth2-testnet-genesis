@@ -20,3 +20,5 @@ config.yaml
 mnemonics.yaml
 tranches
 genesis.ssz
+
+venv
