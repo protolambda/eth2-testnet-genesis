@@ -2,27 +2,29 @@ package main
 
 import (
 	"bufio"
-	"context"
 	"crypto/sha256"
 	"errors"
 	"flag"
 	"fmt"
+	hbls "github.com/herumi/bls-eth-go-binary/bls"
 	"github.com/protolambda/zrnt/eth2/beacon"
 	"github.com/protolambda/zrnt/eth2/configs"
 	"github.com/protolambda/ztyp/codec"
 	"github.com/protolambda/ztyp/tree"
 	"github.com/protolambda/ztyp/view"
 	"github.com/tyler-smith/go-bip39"
-	keystorev4 "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
-	hd "github.com/wealdtech/go-eth2-wallet-hd/v2"
-	scratch "github.com/wealdtech/go-eth2-wallet-store-scratch"
-	types "github.com/wealdtech/go-eth2-wallet-types/v2"
+	util "github.com/wealdtech/go-eth2-util"
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 )
+
+func init() {
+	hbls.Init(hbls.BLS12_381)
+	hbls.SetETHmode(hbls.EthModeLatest)
+}
 
 func main() {
 	depositDataTreeType := view.ListType(beacon.DepositDataType, 1<<32)
@@ -56,16 +58,19 @@ func main() {
 	var validators []beacon.KickstartValidatorData
 	for m, mnemonicSrc := range mnemonics {
 		fmt.Printf("processing mnemonic %d, for %d validators\n", m, mnemonicSrc.Count)
-		wallet, err := walletFromMnemonic(mnemonicSrc.Mnemonic)
+		seed, err := seedFromMnemonic(mnemonicSrc.Mnemonic)
 		if err != nil {
 			check(fmt.Errorf("mnemonic %d is bad", m))
 			return
 		}
 		pubs := make([]string, 0, mnemonicSrc.Count)
 		for i := uint64(0); i < mnemonicSrc.Count; i++ {
-			signingKey, err := wallet.AccountByName(context.Background(), validatorKeyName(i))
+			if i%100 == 0 {
+				fmt.Printf("...validator %d/%d\n", i, mnemonicSrc.Count)
+			}
+			signingKey, err := util.PrivateKeyFromSeedAndPath(seed, validatorKeyName(i))
 			check(err)
-			withdrawalKey, err := wallet.AccountByName(context.Background(), withdrawalKeyName(i))
+			withdrawalKey, err := util.PrivateKeyFromSeedAndPath(seed, withdrawalKeyName(i))
 			check(err)
 
 			// BLS signing key
@@ -84,6 +89,7 @@ func main() {
 
 			validators = append(validators, data)
 		}
+		fmt.Println("Writing pubkeys list file...")
 		check(outputPubkeys(filepath.Join(*tranchesDir, fmt.Sprintf("tranche_%d", m)), pubs))
 	}
 	if uint64(len(validators)) < spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT {
@@ -108,6 +114,7 @@ func main() {
 	// Hack: Reset the deposit index to 0. No deposits happened. (The deposit_index field is 10, and in normal API not writeable, only increasing)
 	check(state.Set(10, view.Uint64View(0)))
 
+	fmt.Println("done preparing state, serializing SSZ now...")
 	f, err := os.OpenFile(*stateOutputPath, os.O_CREATE|os.O_WRONLY, 0777)
 	check(err)
 	defer f.Close()
@@ -126,23 +133,12 @@ func withdrawalKeyName(i uint64) string {
 	return fmt.Sprintf("m/12381/3600/%d/0", i)
 }
 
-func walletFromMnemonic(mnemonic string) (types.WalletAccountByNameProvider, error) {
-	store := scratch.New()
-	encryptor := keystorev4.New()
+func seedFromMnemonic(mnemonic string) (seed []byte, err error) {
 	mnemonic = strings.TrimSpace(mnemonic)
 	if !bip39.IsMnemonicValid(mnemonic) {
 		return nil, errors.New("mnemonic is not valid")
 	}
-	seed := bip39.NewSeed(mnemonic, "")
-	wallet, err := hd.CreateWallet(context.Background(), "imported wallet", []byte{}, store, encryptor, seed)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create scratch wallet from seed: %v", err)
-	}
-	err = wallet.(types.WalletLocker).Unlock(context.Background(), []byte{})
-	if err != nil {
-		return nil, fmt.Errorf("failed to unlock scratch wallet: %v", err)
-	}
-	return wallet.(types.WalletAccountByNameProvider), nil
+	return bip39.NewSeed(mnemonic, ""), nil
 }
 
 func outputPubkeys(outPath string, data []string) error {
