@@ -22,3 +22,5 @@ tranches
 genesis.ssz
 
 venv
+
+*.ssz
