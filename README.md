@@ -27,6 +27,8 @@ The result:
         Eth1 block hash to put into state (default "0x0000000000000000000000000000000000000000000000000000000000000000")
   -eth1-timestamp uint
         Eth1 block timestamp (default 1614555377)
+  -fork-name string
+        Name of the fork to generate a genesis state for. valid values: phase0, altair, merge (default "phase0")
   -mnemonics string
         File with YAML of key sources (default "mnemonics.yaml")
   -state-output string

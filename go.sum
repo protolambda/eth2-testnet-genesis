@@ -2,6 +2,7 @@ github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/ferranbt/fastssz v0.0.0-20210120143747-11b9eff30ea9 h1:9VDpsWq096+oGMDTT/SgBD/VgZYf4pTF+KTPmZ+OaKM=
 github.com/ferranbt/fastssz v0.0.0-20210120143747-11b9eff30ea9/go.mod h1:DyEu2iuLBnb/T51BlsiO3yLYdJC6UbGMrIkqK1KmQxM=
+github.com/golang/snappy v0.0.3/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEWrmP2Q=
 github.com/herumi/bls-eth-go-binary v0.0.0-20200522010937-01d282b5380b h1:mu+F5uA3Y68oB6KXZqWlASKMetbNufhQx2stMI+sD+Y=
 github.com/herumi/bls-eth-go-binary v0.0.0-20200522010937-01d282b5380b/go.mod h1:luAnRm3OsMQeokhGzpYmc0ZKwawY7o87PUEP11Z7r7U=
 github.com/herumi/bls-eth-go-binary v0.0.0-20210130185500-57372fb27371/go.mod h1:luAnRm3OsMQeokhGzpYmc0ZKwawY7o87PUEP11Z7r7U=
@@ -26,8 +27,14 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/protolambda/messagediff v1.4.0/go.mod h1:LboJp0EwIbJsePYpzh5Op/9G1/4mIztMRYzzwR0dR2M=
 github.com/protolambda/zrnt v0.14.0 h1:TIoHibrIZ6rOjV2NMnTdm9wBcaLYs+xdAeWWWwfuV9c=
 github.com/protolambda/zrnt v0.14.0/go.mod h1:rJSDrwIyY6L5L3GvOivJDgJDqvIfpNWIIWB0C3v3SVY=
+github.com/protolambda/zrnt v0.15.1-0.20210413222459-49d2c0e86ef6 h1:uGF+He7fjjFn9csL+vXpCmZzBEcqZ0TkVYbJqc7Tyqo=
+github.com/protolambda/zrnt v0.15.1-0.20210413222459-49d2c0e86ef6/go.mod h1:99Kf8o4zIhSwx/G05jcnoxWdA9GalyofmmennKbsKBk=
+github.com/protolambda/zrnt v0.15.1-0.20210413235627-f1b35d27e21d h1:RuGf48qG6RF6I7l9yI9Gz2lGNEJ6/dQPdXkY0GFe4R4=
+github.com/protolambda/zrnt v0.15.1-0.20210413235627-f1b35d27e21d/go.mod h1:99Kf8o4zIhSwx/G05jcnoxWdA9GalyofmmennKbsKBk=
 github.com/protolambda/ztyp v0.1.2 h1:wT8ansBvtUR48bKgo3ZraXWUKNfds0kabBIWyo9zGvA=
 github.com/protolambda/ztyp v0.1.2/go.mod h1:u9yT4ioIokwlHrOfiZ52ezHfKdza3phxhTJix01vGgU=
+github.com/protolambda/ztyp v0.1.4 h1:Kxn8W4ncsCs4ha27PRfyMLKRrfJkPdZYw4UV9yKqbw8=
+github.com/protolambda/ztyp v0.1.4/go.mod h1:u9yT4ioIokwlHrOfiZ52ezHfKdza3phxhTJix01vGgU=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/stretchr/testify v1.5.1 h1:nOGnQDM7FYENwehXlg/kFVnos3rEvtKTjRvOWSzb6H4=
