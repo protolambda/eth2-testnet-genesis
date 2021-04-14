@@ -21,26 +21,54 @@ The result:
 ## Usage
 
 ```
-  -config string
-        Path to config YAML for eth2 (default "mainnet.yaml")
-  -eth1-block string
-        Eth1 block hash to put into state (default "0x0000000000000000000000000000000000000000000000000000000000000000")
-  -eth1-timestamp uint
-        Eth1 block timestamp (default 1614555377)
-  -fork-name string
-        Name of the fork to generate a genesis state for. valid values: phase0, altair, merge (default "phase0")
-  -mnemonics string
-        File with YAML of key sources (default "mnemonics.yaml")
-  -state-output string
-        Output path for state file (default "genesis.ssz")
-  -tranches-dir string
-         (default "tranches")
+Create genesis state. See sub-commands for different fork versions.
+
+Sub commands:
+  phase0           Create genesis state for phase0 beacon chain
+  altair           Altair not supported yet
+  merge            Create genesis state for post-merge beacon chain, from eth1 and eth2 configs
 ```
 
-The essential inputs are:
-- `config`: like `mainnet.yaml`, but with testnet params (fork version too, part of genesis!)
-- `eth1-block`, `eth1-timestamp`: see main steps for context.
-- `mnemonics`: see below
+### Phase0
+
+```
+Create genesis state for phase0 beacon chain
+
+Flags/args:
+      --config string         Path to config YAML for eth2 (default "mainnet.yaml")
+      --eth1-block bytes32    Eth1 block hash to put into state (default 0000000000000000000000000000000000000000000000000000000000000000)
+      --mnemonics string      File with YAML of key sources (default "mnemonics.yaml")
+      --state-output string   Output path for state file (default "genesis.ssz")
+      --timestamp uint        Eth1 block timestamp (default 1618411084)
+      --tranches-dir string   Directory to dump lists of pubkeys of each tranche in (default "tranches")
+
+```
+
+### Merge
+
+```
+Create genesis state for post-merge beacon chain, from eth1 and eth2 configs
+
+Flags/args:
+      --eth1-config string    Path to config JSON for eth1 (default "eth1_testnet.json")
+      --eth2-config string    Path to config YAML for eth2 (default "eth2_testnet.yaml")
+      --mnemonics string      File with YAML of key sources (default "mnemonics.yaml")
+      --state-output string   Output path for state file (default "genesis.ssz")
+      --tranches-dir string   Directory to dump lists of pubkeys of each tranche in (default "tranches")
+```
+
+## Common inputs
+
+### Eth1 config
+
+A `genesis.json`, as specified in [Geth](https://github.com/ethereum/go-ethereum/blob/a50251e6cbfecfaf26040d42c70d2812bc422a4a/core/genesis.go#L49).
+See [The Merge devnet setup guide](https://notes.ethereum.org/@protolambda/merge-devnet-setup-guide) for more info and config example.
+
+### Eth2 config
+
+A standard YAML file, as specified in [Eth2.0 specs](https://github.com/ethereum/eth2.0-specs/tree/dev/configs). Concatenation of configs of all relevant phases.
+
+### Mnemonics
 
 The `mnemonics.yaml` is formatted as:
 
@@ -51,6 +79,8 @@ The `mnemonics.yaml` is formatted as:
   count: 9000
 # ... more
 ```
+
+## Outputs
 
 The output will be:
 - `genesis.ssz`: a state to start the network with
