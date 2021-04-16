@@ -76,6 +76,7 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 		StateRoot:   merge.Bytes32(eth1GenesisBlock.Root()),
 		Number:      eth1GenesisBlock.NumberU64(),
 		GasLimit:    eth1GenesisBlock.GasLimit(),
+		GasUsed:     eth1GenesisBlock.GasUsed(),
 		Timestamp:   common.Timestamp(eth1GenesisBlock.Time()),
 		ReceiptRoot: merge.Bytes32(eth1GenesisBlock.ReceiptHash()),
 		LogsBloom:   merge.LogsBloom(eth1GenesisBlock.Bloom()),
