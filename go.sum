@@ -381,10 +381,8 @@ github.com/prometheus/tsdb v0.7.1/go.mod h1:qhTCs0VvXwvX/y3TZrWD7rabWM+ijKTux40T
 github.com/protolambda/ask v0.0.5 h1:hcLLEoSVwgK07AkSK+hn7mMICAH1QGxD1YKKmvfJJhE=
 github.com/protolambda/ask v0.0.5/go.mod h1:UEXk+8VL3EIkVTfI3j21uFv47fZFxk0Q1PwXV6zfzIw=
 github.com/protolambda/messagediff v1.4.0/go.mod h1:LboJp0EwIbJsePYpzh5Op/9G1/4mIztMRYzzwR0dR2M=
-github.com/protolambda/zrnt v0.15.1-0.20210413235627-f1b35d27e21d h1:RuGf48qG6RF6I7l9yI9Gz2lGNEJ6/dQPdXkY0GFe4R4=
-github.com/protolambda/zrnt v0.15.1-0.20210413235627-f1b35d27e21d/go.mod h1:99Kf8o4zIhSwx/G05jcnoxWdA9GalyofmmennKbsKBk=
-github.com/protolambda/zrnt v0.15.1-0.20210416194806-822b5d811fdb h1:3J8s02WHGtVN9E1JdWRqhtXlmqucgEHFexVX7Gddy3I=
-github.com/protolambda/zrnt v0.15.1-0.20210416194806-822b5d811fdb/go.mod h1:99Kf8o4zIhSwx/G05jcnoxWdA9GalyofmmennKbsKBk=
+github.com/protolambda/zrnt v0.15.1 h1:AuF2XFqvktmbABkswEvurAyvHRNaJsTSeFvx+5K6Jhw=
+github.com/protolambda/zrnt v0.15.1/go.mod h1:99Kf8o4zIhSwx/G05jcnoxWdA9GalyofmmennKbsKBk=
 github.com/protolambda/ztyp v0.1.4 h1:Kxn8W4ncsCs4ha27PRfyMLKRrfJkPdZYw4UV9yKqbw8=
 github.com/protolambda/ztyp v0.1.4/go.mod h1:u9yT4ioIokwlHrOfiZ52ezHfKdza3phxhTJix01vGgU=
 github.com/retailnext/hllpp v1.0.1-0.20180308014038-101a6d2f8b52/go.mod h1:RDpi1RftBQPUCDRw6SmxeaREsAaRKnOclghuzp/WRzc=
