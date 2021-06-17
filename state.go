@@ -15,9 +15,18 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 	if err := state.SetGenesisTime(eth1Time + spec.GENESIS_DELAY); err != nil {
 		return err
 	}
+	var forkVersion common.Version
+	switch state.(type) {
+	case *merge.BeaconStateView:
+		forkVersion = spec.MERGE_FORK_VERSION
+	case *altair.BeaconStateView:
+		forkVersion = spec.ALTAIR_FORK_VERSION
+	default:
+		forkVersion = spec.GENESIS_FORK_VERSION
+	}
 	if err := state.SetFork(common.Fork{
 		PreviousVersion: spec.GENESIS_FORK_VERSION,
-		CurrentVersion:  spec.GENESIS_FORK_VERSION,
+		CurrentVersion:  forkVersion,
 		Epoch:           common.GENESIS_EPOCH,
 	}); err != nil {
 		return err
@@ -88,6 +97,36 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 	}
 	if err := state.SetGenesisValidatorsRoot(vals.HashTreeRoot(tree.GetHashFn())); err != nil {
 		return err
+	}
+	if st, ok := state.(*altair.BeaconStateView); ok {
+		indicesBounded, err := common.LoadBoundedIndices(vals)
+		if err != nil {
+			return err
+		}
+		active := common.ActiveIndices(indicesBounded, common.GENESIS_EPOCH)
+		indices, err := common.ComputeSyncCommitteeIndices(spec, state, common.GENESIS_EPOCH, active)
+		if err != nil {
+			return fmt.Errorf("failed to compute sync committee indices: %v", err)
+		}
+		pubs, err := common.NewPubkeyCache(vals)
+		if err != nil {
+			return err
+		}
+		// Note: A duplicate committee is assigned for the current and next committee at genesis
+		syncCommittee, err := common.IndicesToSyncCommittee(indices, pubs)
+		if err != nil {
+			return err
+		}
+		syncCommitteeView, err := syncCommittee.View(spec)
+		if err != nil {
+			return err
+		}
+		if err := st.SetCurrentSyncCommittee(syncCommitteeView); err != nil {
+			return err
+		}
+		if err := st.SetNextSyncCommittee(syncCommitteeView); err != nil {
+			return err
+		}
 	}
 	return nil
 }

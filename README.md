@@ -25,7 +25,7 @@ Create genesis state. See sub-commands for different fork versions.
 
 Sub commands:
   phase0           Create genesis state for phase0 beacon chain
-  altair           Altair not supported yet
+  altair           Create genesis state for altair beacon chain
   merge            Create genesis state for post-merge beacon chain, from eth1 and eth2 configs
 ```
 
@@ -35,13 +35,36 @@ Sub commands:
 Create genesis state for phase0 beacon chain
 
 Flags/args:
-      --config string         Path to config YAML for eth2 (default "mainnet.yaml")
-      --eth1-block bytes32    Eth1 block hash to put into state (default 0000000000000000000000000000000000000000000000000000000000000000)
-      --mnemonics string      File with YAML of key sources (default "mnemonics.yaml")
-      --state-output string   Output path for state file (default "genesis.ssz")
-      --timestamp uint        Eth1 block timestamp (default 1618411084)
-      --tranches-dir string   Directory to dump lists of pubkeys of each tranche in (default "tranches")
+      --config string            Eth2 spec configuration, name or path to YAML (default "mainnet")
+      --eth1-block bytes32       Eth1 block hash to put into state (default 0000000000000000000000000000000000000000000000000000000000000000)
+      --legacy-config string     Eth2 legacy configuration (combined config and presets), name or path to YAML (default "mainnet")
+      --mnemonics string         File with YAML of key sources (default "mnemonics.yaml")
+      --preset-altair string     Eth2 altair spec preset, name or path to YAML (default "mainnet")
+      --preset-merge string      Eth2 merge spec preset, name or path to YAML (default "mainnet")
+      --preset-phase0 string     Eth2 phase0 spec preset, name or path to YAML (default "mainnet")
+      --preset-sharding string   Eth2 sharding spec preset, name or path to YAML (default "mainnet")
+      --state-output string      Output path for state file (default "genesis.ssz")
+      --timestamp uint           Eth1 block timestamp (default 1623884847)
+      --tranches-dir string      Directory to dump lists of pubkeys of each tranche in (default "tranches")
+```
 
+### Altair
+
+```
+Create genesis state for altair beacon chain
+
+Flags/args:
+      --config string            Eth2 spec configuration, name or path to YAML (default "mainnet")
+      --eth1-block bytes32       Eth1 block hash to put into state (default 0000000000000000000000000000000000000000000000000000000000000000)
+      --legacy-config string     Eth2 legacy configuration (combined config and presets), name or path to YAML (default "mainnet")
+      --mnemonics string         File with YAML of key sources (default "mnemonics.yaml")
+      --preset-altair string     Eth2 altair spec preset, name or path to YAML (default "mainnet")
+      --preset-merge string      Eth2 merge spec preset, name or path to YAML (default "mainnet")
+      --preset-phase0 string     Eth2 phase0 spec preset, name or path to YAML (default "mainnet")
+      --preset-sharding string   Eth2 sharding spec preset, name or path to YAML (default "mainnet")
+      --state-output string      Output path for state file (default "genesis.ssz")
+      --timestamp uint           Eth1 block timestamp (default 1623884908)
+      --tranches-dir string      Directory to dump lists of pubkeys of each tranche in (default "tranches")
 ```
 
 ### Merge
@@ -50,11 +73,16 @@ Flags/args:
 Create genesis state for post-merge beacon chain, from eth1 and eth2 configs
 
 Flags/args:
-      --eth1-config string    Path to config JSON for eth1 (default "eth1_testnet.json")
-      --eth2-config string    Path to config YAML for eth2 (default "eth2_testnet.yaml")
-      --mnemonics string      File with YAML of key sources (default "mnemonics.yaml")
-      --state-output string   Output path for state file (default "genesis.ssz")
-      --tranches-dir string   Directory to dump lists of pubkeys of each tranche in (default "tranches")
+      --config string            Eth2 spec configuration, name or path to YAML (default "mainnet")
+      --eth1-config string       Path to config JSON for eth1 (default "eth1_testnet.json")
+      --legacy-config string     Eth2 legacy configuration (combined config and presets), name or path to YAML (default "mainnet")
+      --mnemonics string         File with YAML of key sources (default "mnemonics.yaml")
+      --preset-altair string     Eth2 altair spec preset, name or path to YAML (default "mainnet")
+      --preset-merge string      Eth2 merge spec preset, name or path to YAML (default "mainnet")
+      --preset-phase0 string     Eth2 phase0 spec preset, name or path to YAML (default "mainnet")
+      --preset-sharding string   Eth2 sharding spec preset, name or path to YAML (default "mainnet")
+      --state-output string      Output path for state file (default "genesis.ssz")
+      --tranches-dir string      Directory to dump lists of pubkeys of each tranche in (default "tranches")
 ```
 
 ## Common inputs
@@ -92,7 +120,7 @@ The output will be:
 To get info such as fork digest, genesis validators root, etc. run the `compute_genesis_details.py` script.
 Install dependencies with (use of a `venv` recommended):
 ```
-pip install milagro-bls-binding==1.6.3 eth2spec==1.0.0
+pip install milagro-bls-binding==1.6.3 eth2spec==1.1.0a7
 ```
 
 ## License

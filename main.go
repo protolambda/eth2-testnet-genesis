@@ -24,7 +24,7 @@ func (c *GenesisCmd) Cmd(route string) (cmd interface{}, err error) {
 	case "phase0":
 		cmd = &Phase0GenesisCmd{}
 	case "altair":
-		return nil, fmt.Errorf("Altair not supported yet")
+		cmd = &AltairGenesisCmd{}
 	case "merge":
 		cmd = &MergeGenesisCmd{}
 	default:

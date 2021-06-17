@@ -50,7 +50,7 @@ func loadValidatorKeys(spec *common.Spec, mnemonicsConfigPath string, tranchesDi
 			h := sha256.New()
 			h.Write(withdrawalKey.PublicKey().Marshal())
 			copy(data.WithdrawalCredentials[:], h.Sum(nil))
-			data.WithdrawalCredentials[0] = spec.BLS_WITHDRAWAL_PREFIX[0]
+			data.WithdrawalCredentials[0] = common.BLS_WITHDRAWAL_PREFIX
 
 			// Max effective balance by default for activation
 			data.Balance = spec.MAX_EFFECTIVE_BALANCE

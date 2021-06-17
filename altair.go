@@ -5,14 +5,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/protolambda/zcli/util"
+	"github.com/protolambda/zrnt/eth2/beacon/altair"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
-	"github.com/protolambda/zrnt/eth2/beacon/phase0"
 	"github.com/protolambda/ztyp/codec"
 	"os"
 	"time"
 )
 
-type Phase0GenesisCmd struct {
+type AltairGenesisCmd struct {
 	util.SpecOptions     `ask:"."`
 	Eth1BlockHash        common.Root      `ask:"--eth1-block" help:"Eth1 block hash to put into state"`
 	Eth1BlockTimestamp   common.Timestamp `ask:"--timestamp" help:"Eth1 block timestamp"`
@@ -21,11 +21,11 @@ type Phase0GenesisCmd struct {
 	TranchesDir          string           `ask:"--tranches-dir" help:"Directory to dump lists of pubkeys of each tranche in"`
 }
 
-func (g *Phase0GenesisCmd) Help() string {
-	return "Create genesis state for phase0 beacon chain"
+func (g *AltairGenesisCmd) Help() string {
+	return "Create genesis state for altair beacon chain"
 }
 
-func (g *Phase0GenesisCmd) Default() {
+func (g *AltairGenesisCmd) Default() {
 	g.SpecOptions.Default()
 	g.Eth1BlockHash = common.Root{}
 	g.Eth1BlockTimestamp = common.Timestamp(time.Now().Unix())
@@ -34,7 +34,7 @@ func (g *Phase0GenesisCmd) Default() {
 	g.TranchesDir = "tranches"
 }
 
-func (g *Phase0GenesisCmd) Run(ctx context.Context, args ...string) error {
+func (g *AltairGenesisCmd) Run(ctx context.Context, args ...string) error {
 	spec, err := g.SpecOptions.Spec()
 	if err != nil {
 		return err
@@ -53,7 +53,7 @@ func (g *Phase0GenesisCmd) Run(ctx context.Context, args ...string) error {
 		fmt.Printf("WARNING: not enough validators for genesis. Key sources sum up to %d total. But need %d.\n", len(validators), spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT)
 	}
 
-	state := phase0.NewBeaconStateView(spec)
+	state := altair.NewBeaconStateView(spec)
 	if err := setupState(spec, state, g.Eth1BlockTimestamp, g.Eth1BlockHash, validators); err != nil {
 		return err
 	}

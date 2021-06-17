@@ -5,17 +5,19 @@ import (
 	"context"
 	"fmt"
 	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/protolambda/zcli/util"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
 	"github.com/protolambda/zrnt/eth2/beacon/merge"
 	"github.com/protolambda/ztyp/codec"
 	"github.com/protolambda/ztyp/tree"
+	"github.com/protolambda/ztyp/view"
 	"os"
 	"time"
 )
 
 type MergeGenesisCmd struct {
+	util.SpecOptions     `ask:"."`
 	Eth1Config           string `ask:"--eth1-config" help:"Path to config JSON for eth1"`
-	Eth2Config           string `ask:"--eth2-config" help:"Path to config YAML for eth2"`
 	MnemonicsSrcFilePath string `ask:"--mnemonics" help:"File with YAML of key sources"`
 	StateOutputPath      string `ask:"--state-output" help:"Output path for state file"`
 	TranchesDir          string `ask:"--tranches-dir" help:"Directory to dump lists of pubkeys of each tranche in"`
@@ -26,8 +28,8 @@ func (g *MergeGenesisCmd) Help() string {
 }
 
 func (g *MergeGenesisCmd) Default() {
+	g.SpecOptions.Default()
 	g.Eth1Config = "eth1_testnet.json"
-	g.Eth2Config = "eth2_testnet.yaml"
 	g.MnemonicsSrcFilePath = "mnemonics.yaml"
 	g.StateOutputPath = "genesis.ssz"
 	g.TranchesDir = "tranches"
@@ -42,7 +44,7 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 	eth1Db := rawdb.NewMemoryDatabase()
 	eth1GenesisBlock := eth1Genesis.ToBlock(eth1Db)
 
-	spec, err := loadSpec(g.Eth2Config)
+	spec, err := g.SpecOptions.Spec()
 	if err != nil {
 		return err
 	}
@@ -69,19 +71,19 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 		return err
 	}
 
-	if err := state.SetLatestExecutionPayloadHeader(&merge.ExecutionPayloadHeader{
+	if err := state.SetLatestExecutionPayloadHeader(&common.ExecutionPayloadHeader{
 		BlockHash:   eth1BlockHash,
 		ParentHash:  common.Root(eth1GenesisBlock.ParentHash()),
 		CoinBase:    common.Eth1Address(eth1GenesisBlock.Coinbase()),
-		StateRoot:   merge.Bytes32(eth1GenesisBlock.Root()),
-		Number:      eth1GenesisBlock.NumberU64(),
-		GasLimit:    eth1GenesisBlock.GasLimit(),
-		GasUsed:     eth1GenesisBlock.GasUsed(),
+		StateRoot:   common.Bytes32(eth1GenesisBlock.Root()),
+		Number:      view.Uint64View(eth1GenesisBlock.NumberU64()),
+		GasLimit:    view.Uint64View(eth1GenesisBlock.GasLimit()),
+		GasUsed:     view.Uint64View(eth1GenesisBlock.GasUsed()),
 		Timestamp:   common.Timestamp(eth1GenesisBlock.Time()),
-		ReceiptRoot: merge.Bytes32(eth1GenesisBlock.ReceiptHash()),
-		LogsBloom:   merge.LogsBloom(eth1GenesisBlock.Bloom()),
+		ReceiptRoot: common.Bytes32(eth1GenesisBlock.ReceiptHash()),
+		LogsBloom:   common.LogsBloom(eth1GenesisBlock.Bloom()),
 		// empty transactions root
-		TransactionsRoot: merge.PayloadTransactionsType.DefaultNode().MerkleRoot(tree.GetHashFn()),
+		TransactionsRoot: common.PayloadTransactionsType.DefaultNode().MerkleRoot(tree.GetHashFn()),
 	}); err != nil {
 		return err
 	}
