@@ -13,7 +13,7 @@ import (
 )
 
 type AltairGenesisCmd struct {
-	configs.SpecOptions     `ask:"."`
+	configs.SpecOptions  `ask:"."`
 	Eth1BlockHash        common.Root      `ask:"--eth1-block" help:"Eth1 block hash to put into state"`
 	Eth1BlockTimestamp   common.Timestamp `ask:"--timestamp" help:"Eth1 block timestamp"`
 	MnemonicsSrcFilePath string           `ask:"--mnemonics" help:"File with YAML of key sources"`

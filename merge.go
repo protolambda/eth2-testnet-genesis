@@ -71,6 +71,10 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 		eth1BlockHash, validators); err != nil {
 		return err
 	}
+	extra := eth1GenesisBlock.Extra()
+	if len(extra) > common.MAX_EXTRA_DATA_BYTES {
+		return fmt.Errorf("extra data is %d bytes, max is %d", len(extra), common.MAX_EXTRA_DATA_BYTES)
+	}
 
 	baseFee, _ := uint256.FromBig(eth1GenesisBlock.BaseFee())
 	if err := state.SetLatestExecutionPayloadHeader(&common.ExecutionPayloadHeader{
@@ -84,6 +88,7 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 		GasLimit:      view.Uint64View(eth1GenesisBlock.GasLimit()),
 		GasUsed:       view.Uint64View(eth1GenesisBlock.GasUsed()),
 		Timestamp:     common.Timestamp(eth1GenesisBlock.Time()),
+		ExtraData:     extra,
 		BaseFeePerGas: baseFee.Bytes32(),
 		BlockHash:     eth1BlockHash,
 		// empty transactions root
