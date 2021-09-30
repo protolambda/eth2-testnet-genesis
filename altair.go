@@ -4,16 +4,16 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/protolambda/zcli/util"
 	"github.com/protolambda/zrnt/eth2/beacon/altair"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
+	"github.com/protolambda/zrnt/eth2/configs"
 	"github.com/protolambda/ztyp/codec"
 	"os"
 	"time"
 )
 
 type AltairGenesisCmd struct {
-	util.SpecOptions     `ask:"."`
+	configs.SpecOptions     `ask:"."`
 	Eth1BlockHash        common.Root      `ask:"--eth1-block" help:"Eth1 block hash to put into state"`
 	Eth1BlockTimestamp   common.Timestamp `ask:"--timestamp" help:"Eth1 block timestamp"`
 	MnemonicsSrcFilePath string           `ask:"--mnemonics" help:"File with YAML of key sources"`

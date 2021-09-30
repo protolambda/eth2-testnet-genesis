@@ -41,7 +41,7 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 		return err
 	}
 	// Leave the deposit index to 0. No deposits happened.
-	if i, err := state.DepositIndex(); err != nil {
+	if i, err := state.Eth1DepositIndex(); err != nil {
 		return err
 	} else if i != 0 {
 		return fmt.Errorf("expected 0 deposit index in state, got %d", i)

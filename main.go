@@ -44,14 +44,14 @@ func main() {
 		_, _ = fmt.Fprintf(os.Stderr, "failed to load main command: %v", err.Error())
 		os.Exit(1)
 	}
-	if cmd, isHelp, err := descr.Execute(context.Background(), os.Args[1:]...); err != nil && err != ask.UnrecognizedErr {
+	if cmd, err := descr.Execute(context.Background(), nil, os.Args[1:]...); err != nil && err != ask.UnrecognizedErr && err != ask.HelpErr {
 		_, _ = fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	} else if cmd == nil {
 		_, _ = fmt.Fprintln(os.Stderr, "failed to load command")
 		os.Exit(1)
-	} else if isHelp || (err == ask.UnrecognizedErr) {
-		_, _ = fmt.Fprintln(os.Stdout, cmd.Usage())
+	} else {
+		_, _ = fmt.Fprintln(os.Stdout, cmd.Usage(false))
 		os.Exit(0)
 	}
 }

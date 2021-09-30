@@ -5,9 +5,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/protolambda/zcli/util"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
 	"github.com/protolambda/zrnt/eth2/beacon/merge"
+	"github.com/protolambda/zrnt/eth2/configs"
 	"github.com/protolambda/ztyp/codec"
 	"github.com/protolambda/ztyp/tree"
 	"github.com/protolambda/ztyp/view"
@@ -16,7 +16,7 @@ import (
 )
 
 type MergeGenesisCmd struct {
-	util.SpecOptions     `ask:"."`
+	configs.SpecOptions     `ask:"."`
 	Eth1Config           string `ask:"--eth1-config" help:"Path to config JSON for eth1"`
 	MnemonicsSrcFilePath string `ask:"--mnemonics" help:"File with YAML of key sources"`
 	StateOutputPath      string `ask:"--state-output" help:"Output path for state file"`
@@ -76,14 +76,14 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 		ParentHash:  common.Root(eth1GenesisBlock.ParentHash()),
 		CoinBase:    common.Eth1Address(eth1GenesisBlock.Coinbase()),
 		StateRoot:   common.Bytes32(eth1GenesisBlock.Root()),
-		Number:      view.Uint64View(eth1GenesisBlock.NumberU64()),
+		BlockNumber:      view.Uint64View(eth1GenesisBlock.NumberU64()),
 		GasLimit:    view.Uint64View(eth1GenesisBlock.GasLimit()),
 		GasUsed:     view.Uint64View(eth1GenesisBlock.GasUsed()),
 		Timestamp:   common.Timestamp(eth1GenesisBlock.Time()),
 		ReceiptRoot: common.Bytes32(eth1GenesisBlock.ReceiptHash()),
 		LogsBloom:   common.LogsBloom(eth1GenesisBlock.Bloom()),
 		// empty transactions root
-		TransactionsRoot: common.PayloadTransactionsType.DefaultNode().MerkleRoot(tree.GetHashFn()),
+		TransactionsRoot: common.PayloadTransactionsType(spec).DefaultNode().MerkleRoot(tree.GetHashFn()),
 	}); err != nil {
 		return err
 	}
