@@ -50,7 +50,7 @@ func main() {
 	} else if cmd == nil {
 		_, _ = fmt.Fprintln(os.Stderr, "failed to load command")
 		os.Exit(1)
-	} else {
+	} else if err == ask.HelpErr {
 		_, _ = fmt.Fprintln(os.Stdout, cmd.Usage(false))
 		os.Exit(0)
 	}
