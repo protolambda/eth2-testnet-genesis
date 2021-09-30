@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/holiman/uint256"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
 	"github.com/protolambda/zrnt/eth2/beacon/merge"
 	"github.com/protolambda/zrnt/eth2/configs"
@@ -16,7 +17,7 @@ import (
 )
 
 type MergeGenesisCmd struct {
-	configs.SpecOptions     `ask:"."`
+	configs.SpecOptions  `ask:"."`
 	Eth1Config           string `ask:"--eth1-config" help:"Path to config JSON for eth1"`
 	MnemonicsSrcFilePath string `ask:"--mnemonics" help:"File with YAML of key sources"`
 	StateOutputPath      string `ask:"--state-output" help:"Output path for state file"`
@@ -71,17 +72,20 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 		return err
 	}
 
+	baseFee, _ := uint256.FromBig(eth1GenesisBlock.BaseFee())
 	if err := state.SetLatestExecutionPayloadHeader(&common.ExecutionPayloadHeader{
-		BlockHash:   eth1BlockHash,
-		ParentHash:  common.Root(eth1GenesisBlock.ParentHash()),
-		CoinBase:    common.Eth1Address(eth1GenesisBlock.Coinbase()),
-		StateRoot:   common.Bytes32(eth1GenesisBlock.Root()),
-		BlockNumber:      view.Uint64View(eth1GenesisBlock.NumberU64()),
-		GasLimit:    view.Uint64View(eth1GenesisBlock.GasLimit()),
-		GasUsed:     view.Uint64View(eth1GenesisBlock.GasUsed()),
-		Timestamp:   common.Timestamp(eth1GenesisBlock.Time()),
-		ReceiptRoot: common.Bytes32(eth1GenesisBlock.ReceiptHash()),
-		LogsBloom:   common.LogsBloom(eth1GenesisBlock.Bloom()),
+		ParentHash:    common.Root(eth1GenesisBlock.ParentHash()),
+		CoinBase:      common.Eth1Address(eth1GenesisBlock.Coinbase()),
+		StateRoot:     common.Bytes32(eth1GenesisBlock.Root()),
+		ReceiptRoot:   common.Bytes32(eth1GenesisBlock.ReceiptHash()),
+		LogsBloom:     common.LogsBloom(eth1GenesisBlock.Bloom()),
+		Random:        common.Bytes32{},
+		BlockNumber:   view.Uint64View(eth1GenesisBlock.NumberU64()),
+		GasLimit:      view.Uint64View(eth1GenesisBlock.GasLimit()),
+		GasUsed:       view.Uint64View(eth1GenesisBlock.GasUsed()),
+		Timestamp:     common.Timestamp(eth1GenesisBlock.Time()),
+		BaseFeePerGas: baseFee.Bytes32(),
+		BlockHash:     eth1BlockHash,
 		// empty transactions root
 		TransactionsRoot: common.PayloadTransactionsType(spec).DefaultNode().MerkleRoot(tree.GetHashFn()),
 	}); err != nil {
