@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/protolambda/zrnt/eth2"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
 	"github.com/protolambda/zrnt/eth2/beacon/phase0"
 	"github.com/protolambda/zrnt/eth2/configs"
@@ -35,6 +36,7 @@ func (g *Phase0GenesisCmd) Default() {
 }
 
 func (g *Phase0GenesisCmd) Run(ctx context.Context, args ...string) error {
+	fmt.Printf("zrnt version: %s\n", eth2.VERSION)
 	spec, err := g.SpecOptions.Spec()
 	if err != nil {
 		return err

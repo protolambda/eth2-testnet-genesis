@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/holiman/uint256"
+	"github.com/protolambda/zrnt/eth2"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
 	"github.com/protolambda/zrnt/eth2/beacon/merge"
 	"github.com/protolambda/zrnt/eth2/configs"
@@ -37,6 +38,7 @@ func (g *MergeGenesisCmd) Default() {
 }
 
 func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
+	fmt.Printf("zrnt version: %s\n", eth2.VERSION)
 	eth1Genesis, err := loadEth1GenesisConf(g.Eth1Config)
 	if err != nil {
 		return err
