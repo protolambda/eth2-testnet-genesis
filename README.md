@@ -91,8 +91,7 @@ Flags/args:
 
 ### Eth1 config
 
-A `genesis.json`, as specified in [Geth](https://github.com/ethereum/go-ethereum/blob/a50251e6cbfecfaf26040d42c70d2812bc422a4a/core/genesis.go#L49).
-See [The Merge devnet setup guide](https://notes.ethereum.org/@protolambda/merge-devnet-setup-guide) for more info and config example.
+A `genesis.json`, as specified in [Geth](https://github.com/ethereum/go-ethereum/blob/307156cc46f7241dfad702f72b8ed2e338770337/core/genesis.go#L49).
 
 ### Eth2 config
 
