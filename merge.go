@@ -23,7 +23,7 @@ type MergeGenesisCmd struct {
 	Eth1Config          string `ask:"--eth1-config" help:"Path to config JSON for eth1. No transition yet if empty."`
 
 	Eth1BlockHash      common.Root      `ask:"--eth1-block" help:"If not transitioned: Eth1 block hash to put into state."`
-	Eth1BlockTimestamp common.Timestamp `ask:"--timestamp" help:"If not transitioned: Eth1 block timestamp"`
+	Eth1BlockTimestamp common.Timestamp `ask:"--eth1-timestamp" help:"If not transitioned: Eth1 block timestamp"`
 
 	MnemonicsSrcFilePath string `ask:"--mnemonics" help:"File with YAML of key sources"`
 	StateOutputPath      string `ask:"--state-output" help:"Output path for state file"`
