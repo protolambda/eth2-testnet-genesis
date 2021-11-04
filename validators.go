@@ -4,14 +4,17 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync/atomic"
+
 	"github.com/protolambda/zrnt/eth2/beacon/common"
 	"github.com/protolambda/zrnt/eth2/beacon/phase0"
 	"github.com/tyler-smith/go-bip39"
 	util "github.com/wealdtech/go-eth2-util"
+	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v3"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 func loadValidatorKeys(spec *common.Spec, mnemonicsConfigPath string, tranchesDir string) ([]phase0.KickstartValidatorData, error) {
@@ -20,43 +23,61 @@ func loadValidatorKeys(spec *common.Spec, mnemonicsConfigPath string, tranchesDi
 		return nil, err
 	}
 
-	var validators []phase0.KickstartValidatorData
+	//var validators []phase0.KickstartValidatorData
+	var valCount uint64 = 0
+	for _, mnemonicSrc := range mnemonics {
+		valCount += mnemonicSrc.Count
+	}
+	validators := make([]phase0.KickstartValidatorData, valCount)
+
 	for m, mnemonicSrc := range mnemonics {
+		var g errgroup.Group
+		var prog int32
 		fmt.Printf("processing mnemonic %d, for %d validators\n", m, mnemonicSrc.Count)
 		seed, err := seedFromMnemonic(mnemonicSrc.Mnemonic)
 		if err != nil {
 			return nil, fmt.Errorf("mnemonic %d is bad", m)
 		}
-		pubs := make([]string, 0, mnemonicSrc.Count)
+		pubs := make([]string, mnemonicSrc.Count)
 		for i := uint64(0); i < mnemonicSrc.Count; i++ {
-			if i%100 == 0 {
-				fmt.Printf("...validator %d/%d\n", i, mnemonicSrc.Count)
-			}
-			signingKey, err := util.PrivateKeyFromSeedAndPath(seed, validatorKeyName(i))
-			if err != nil {
-				return nil, err
-			}
-			withdrawalKey, err := util.PrivateKeyFromSeedAndPath(seed, withdrawalKeyName(i))
-			if err != nil {
-				return nil, err
-			}
+			mIdx := m
+			idx := i
+			g.Go(func() error {
+				signingKey, err := util.PrivateKeyFromSeedAndPath(seed, validatorKeyName(idx))
+				if err != nil {
+					return err
+				}
+				withdrawalKey, err := util.PrivateKeyFromSeedAndPath(seed, withdrawalKeyName(idx))
+				if err != nil {
+					return err
+				}
 
-			// BLS signing key
-			var data phase0.KickstartValidatorData
-			copy(data.Pubkey[:], signingKey.PublicKey().Marshal())
-			pubs = append(pubs, data.Pubkey.String())
+				// BLS signing key
+				var data phase0.KickstartValidatorData
+				copy(data.Pubkey[:], signingKey.PublicKey().Marshal())
+				pubs[idx] = data.Pubkey.String()
 
-			// BLS withdrawal credentials
-			h := sha256.New()
-			h.Write(withdrawalKey.PublicKey().Marshal())
-			copy(data.WithdrawalCredentials[:], h.Sum(nil))
-			data.WithdrawalCredentials[0] = common.BLS_WITHDRAWAL_PREFIX
+				// BLS withdrawal credentials
+				h := sha256.New()
+				h.Write(withdrawalKey.PublicKey().Marshal())
+				copy(data.WithdrawalCredentials[:], h.Sum(nil))
+				data.WithdrawalCredentials[0] = common.BLS_WITHDRAWAL_PREFIX
 
-			// Max effective balance by default for activation
-			data.Balance = spec.MAX_EFFECTIVE_BALANCE
+				// Max effective balance by default for activation
+				data.Balance = spec.MAX_EFFECTIVE_BALANCE
+				validators[idx*uint64(mIdx+1)] = data
+				atomic.AddInt32(&prog, 1)
+				if prog%100 == 0 {
+					fmt.Printf("...validator %d/%d\n", prog, mnemonicSrc.Count)
+				}
+				return nil
+			})
 
-			validators = append(validators, data)
 		}
+		if err := g.Wait(); err != nil {
+			return nil, err
+		}
+
 		fmt.Println("Writing pubkeys list file...")
 		if err := outputPubkeys(filepath.Join(tranchesDir, fmt.Sprintf("tranche_%04d.txt", m)), pubs); err != nil {
 			return nil, err
