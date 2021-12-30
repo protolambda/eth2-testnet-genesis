@@ -80,7 +80,7 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 		execHeader = &common.ExecutionPayloadHeader{
 			ParentHash:    common.Root(eth1GenesisBlock.ParentHash()),
-			CoinBase:      common.Eth1Address(eth1GenesisBlock.Coinbase()),
+			FeeRecipient:  common.Eth1Address(eth1GenesisBlock.Coinbase()),
 			StateRoot:     common.Bytes32(eth1GenesisBlock.Root()),
 			ReceiptRoot:   common.Bytes32(eth1GenesisBlock.ReceiptHash()),
 			LogsBloom:     common.LogsBloom(eth1GenesisBlock.Bloom()),
