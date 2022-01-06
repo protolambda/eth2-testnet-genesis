@@ -6,6 +6,7 @@ import (
 	"github.com/protolambda/zrnt/eth2/beacon/common"
 	"github.com/protolambda/zrnt/eth2/beacon/merge"
 	"github.com/protolambda/zrnt/eth2/beacon/phase0"
+	"github.com/protolambda/zrnt/eth2/configs"
 	"github.com/protolambda/ztyp/tree"
 )
 
@@ -49,11 +50,11 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 	var emptyBody tree.HTR
 	switch state.(type) {
 	case *merge.BeaconStateView:
-		emptyBody = spec.Wrap(new(merge.BeaconBlockBody))
+		emptyBody = merge.BeaconBlockBodyType(configs.Mainnet).New()
 	case *altair.BeaconStateView:
-		emptyBody = spec.Wrap(new(altair.BeaconBlockBody))
+		emptyBody = altair.BeaconBlockBodyType(configs.Mainnet).New()
 	default:
-		emptyBody = spec.Wrap(new(phase0.BeaconBlockBody))
+		emptyBody = phase0.BeaconBlockBodyType(configs.Mainnet).New()
 	}
 	latestHeader := &common.BeaconBlockHeader{
 		BodyRoot: emptyBody.HashTreeRoot(tree.GetHashFn()),
@@ -98,7 +99,7 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 	if err := state.SetGenesisValidatorsRoot(vals.HashTreeRoot(tree.GetHashFn())); err != nil {
 		return err
 	}
-	if st, ok := state.(*altair.BeaconStateView); ok {
+	if st, ok := state.(common.SyncCommitteeBeaconState); ok {
 		indicesBounded, err := common.LoadBoundedIndices(vals)
 		if err != nil {
 			return err
