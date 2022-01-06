@@ -99,7 +99,7 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 	if err := state.SetGenesisValidatorsRoot(vals.HashTreeRoot(tree.GetHashFn())); err != nil {
 		return err
 	}
-	if st, ok := state.(*altair.BeaconStateView); ok {
+	if st, ok := state.(common.SyncCommitteeBeaconState); ok {
 		indicesBounded, err := common.LoadBoundedIndices(vals)
 		if err != nil {
 			return err
