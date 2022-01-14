@@ -90,7 +90,7 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 			GasUsed:       view.Uint64View(eth1GenesisBlock.GasUsed()),
 			Timestamp:     common.Timestamp(eth1GenesisBlock.Time()),
 			ExtraData:     extra,
-			BaseFeePerGas: baseFee.Bytes32(),
+			BaseFeePerGas: view.Uint256View(*baseFee),
 			BlockHash:     eth1BlockHash,
 			// empty transactions root
 			TransactionsRoot: common.PayloadTransactionsType(spec).DefaultNode().MerkleRoot(tree.GetHashFn()),

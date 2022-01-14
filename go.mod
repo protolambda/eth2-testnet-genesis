@@ -15,8 +15,8 @@ require (
 	github.com/prometheus/tsdb v0.10.0 // indirect
 	github.com/protolambda/ask v0.1.2
 	github.com/protolambda/bls12-381-util v0.0.0-20210812140640-b03868185758 // indirect
-	github.com/protolambda/zrnt v0.23.0
-	github.com/protolambda/ztyp v0.1.9
+	github.com/protolambda/zrnt v0.24.0
+	github.com/protolambda/ztyp v0.2.1
 	github.com/shirou/gopsutil v3.21.8+incompatible // indirect
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/tyler-smith/go-bip39 v1.1.0
