@@ -30,6 +30,7 @@ func loadValidatorKeys(spec *common.Spec, mnemonicsConfigPath string, tranchesDi
 	}
 	validators := make([]phase0.KickstartValidatorData, valCount)
 
+	offset := uint64(0)
 	for m, mnemonicSrc := range mnemonics {
 		var g errgroup.Group
 		var prog int32
@@ -40,7 +41,7 @@ func loadValidatorKeys(spec *common.Spec, mnemonicsConfigPath string, tranchesDi
 		}
 		pubs := make([]string, mnemonicSrc.Count)
 		for i := uint64(0); i < mnemonicSrc.Count; i++ {
-			mIdx := m
+			valIndex := offset + i
 			idx := i
 			g.Go(func() error {
 				signingKey, err := util.PrivateKeyFromSeedAndPath(seed, validatorKeyName(idx))
@@ -65,7 +66,7 @@ func loadValidatorKeys(spec *common.Spec, mnemonicsConfigPath string, tranchesDi
 
 				// Max effective balance by default for activation
 				data.Balance = spec.MAX_EFFECTIVE_BALANCE
-				validators[idx*uint64(mIdx+1)] = data
+				validators[valIndex] = data
 				atomic.AddInt32(&prog, 1)
 				if prog%100 == 0 {
 					fmt.Printf("...validator %d/%d\n", prog, mnemonicSrc.Count)
@@ -74,6 +75,7 @@ func loadValidatorKeys(spec *common.Spec, mnemonicsConfigPath string, tranchesDi
 			})
 
 		}
+		offset += mnemonicSrc.Count
 		if err := g.Wait(); err != nil {
 			return nil, err
 		}
