@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/holiman/uint256"
 	"github.com/protolambda/zrnt/eth2"
+	"github.com/protolambda/zrnt/eth2/beacon/bellatrix"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
-	"github.com/protolambda/zrnt/eth2/beacon/merge"
 	"github.com/protolambda/zrnt/eth2/configs"
 	"github.com/protolambda/ztyp/codec"
 	"github.com/protolambda/ztyp/tree"
@@ -82,9 +82,9 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 			ParentHash:    common.Root(eth1GenesisBlock.ParentHash()),
 			FeeRecipient:  common.Eth1Address(eth1GenesisBlock.Coinbase()),
 			StateRoot:     common.Bytes32(eth1GenesisBlock.Root()),
-			ReceiptRoot:   common.Bytes32(eth1GenesisBlock.ReceiptHash()),
+			ReceiptsRoot:  common.Bytes32(eth1GenesisBlock.ReceiptHash()),
 			LogsBloom:     common.LogsBloom(eth1GenesisBlock.Bloom()),
-			Random:        common.Bytes32{},
+			PrevRandao:    common.Bytes32{},
 			BlockNumber:   view.Uint64View(eth1GenesisBlock.NumberU64()),
 			GasLimit:      view.Uint64View(eth1GenesisBlock.GasLimit()),
 			GasUsed:       view.Uint64View(eth1GenesisBlock.GasUsed()),
@@ -115,7 +115,7 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 		fmt.Printf("WARNING: not enough validators for genesis. Key sources sum up to %d total. But need %d.\n", len(validators), spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT)
 	}
 
-	state := merge.NewBeaconStateView(spec)
+	state := bellatrix.NewBeaconStateView(spec)
 	if err := setupState(spec, state, eth1Timestamp, eth1BlockHash, validators); err != nil {
 		return err
 	}

@@ -351,8 +351,8 @@ github.com/protolambda/bls12-381-util v0.0.0-20210720105258-a772f2aac13e/go.mod 
 github.com/protolambda/bls12-381-util v0.0.0-20210812140640-b03868185758 h1:Y+nKcW05nyE1vh/lqislMgU0ZMk7Pq/hEDk72mSybTQ=
 github.com/protolambda/bls12-381-util v0.0.0-20210812140640-b03868185758/go.mod h1:IToEjHuttnUzwZI5KBSM/LOOW3qLbbrHOEfp3SbECGY=
 github.com/protolambda/messagediff v1.4.0/go.mod h1:LboJp0EwIbJsePYpzh5Op/9G1/4mIztMRYzzwR0dR2M=
-github.com/protolambda/zrnt v0.24.0 h1:FeKPmWmr10t9rGxq+uQrnVSktBX9gejabTtXhlwTZx8=
-github.com/protolambda/zrnt v0.24.0/go.mod h1:lTbFlr58RAlNRQNkaHyQmXYzaRgsdQXdmgNWalfIyEs=
+github.com/protolambda/zrnt v0.26.0 h1:1qBT9S6lX2eRNKV6HX9mtLLby1UtCJd8fD5mtYP4f9U=
+github.com/protolambda/zrnt v0.26.0/go.mod h1:lTbFlr58RAlNRQNkaHyQmXYzaRgsdQXdmgNWalfIyEs=
 github.com/protolambda/ztyp v0.2.1 h1:+rfw75/Zh8EopNlG652TGDXlLgJflj6XWxJ9yCVpJws=
 github.com/protolambda/ztyp v0.2.1/go.mod h1:9bYgKGqg3wJqT9ac1gI2hnVb0STQq7p/1lapqrqY1dU=
 github.com/retailnext/hllpp v1.0.1-0.20180308014038-101a6d2f8b52/go.mod h1:RDpi1RftBQPUCDRw6SmxeaREsAaRKnOclghuzp/WRzc=

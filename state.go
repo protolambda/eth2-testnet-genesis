@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/protolambda/zrnt/eth2/beacon/altair"
+	"github.com/protolambda/zrnt/eth2/beacon/bellatrix"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
-	"github.com/protolambda/zrnt/eth2/beacon/merge"
 	"github.com/protolambda/zrnt/eth2/beacon/phase0"
 	"github.com/protolambda/zrnt/eth2/configs"
 	"github.com/protolambda/ztyp/tree"
@@ -18,8 +18,8 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 	}
 	var forkVersion common.Version
 	switch state.(type) {
-	case *merge.BeaconStateView:
-		forkVersion = spec.MERGE_FORK_VERSION
+	case *bellatrix.BeaconStateView:
+		forkVersion = spec.BELLATRIX_FORK_VERSION
 	case *altair.BeaconStateView:
 		forkVersion = spec.ALTAIR_FORK_VERSION
 	default:
@@ -49,8 +49,8 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 	}
 	var emptyBody tree.HTR
 	switch state.(type) {
-	case *merge.BeaconStateView:
-		emptyBody = merge.BeaconBlockBodyType(configs.Mainnet).New()
+	case *bellatrix.BeaconStateView:
+		emptyBody = bellatrix.BeaconBlockBodyType(configs.Mainnet).New()
 	case *altair.BeaconStateView:
 		emptyBody = altair.BeaconBlockBodyType(configs.Mainnet).New()
 	default:
