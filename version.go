@@ -18,6 +18,14 @@ func (g *VersionCmd) Help() string {
 func (g *VersionCmd) Default() {}
 
 func (g *VersionCmd) Run(ctx context.Context, args ...string) error {
-	fmt.Printf("version %s-%s-%s\n", eth2.VERSION, GitBranch, GitCommit[:6])
+	var versionstr string
+	versionstr = eth2.VERSION
+	if len(GitBranch) > 0 {
+		versionstr += "-" + GitBranch
+	}
+	if len(GitCommit) > 6 {
+		versionstr += "-" + GitCommit[:6]
+	}
+	fmt.Printf("%s\n", versionstr)
 	return nil
 }
