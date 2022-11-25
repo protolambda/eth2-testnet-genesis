@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync/atomic"
 
@@ -17,7 +20,33 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func loadValidatorKeys(spec *common.Spec, mnemonicsConfigPath string, tranchesDir string) ([]phase0.KickstartValidatorData, error) {
+func loadValidatorKeys(spec *common.Spec, mnemonicsConfigPath string, validatorsListPath string, tranchesDir string) ([]phase0.KickstartValidatorData, error) {
+	validators := []phase0.KickstartValidatorData{}
+
+	if mnemonicsConfigPath != "" {
+		val, err := generateValidatorKeysByMnemonic(spec, mnemonicsConfigPath, tranchesDir)
+		if err != nil {
+			fmt.Printf("error loading validators from mnemonic yaml (%s): %s\n", mnemonicsConfigPath, err)
+		} else {
+			fmt.Printf("generated %d validators from mnemonic yaml (%s)\n", len(val), mnemonicsConfigPath)
+			validators = append(validators, val...)
+		}
+	}
+	
+	if validatorsListPath != "" {
+		val, err := loadValidatorsFromFile(spec, validatorsListPath)
+		if err != nil {
+			fmt.Printf("error loading validators from validators list (%s): %s\n", validatorsListPath, err)
+		} else {
+			fmt.Printf("loaded %d validators from validators list (%s)\n", len(val), validatorsListPath)
+			validators = append(validators, val...)
+		}
+	}
+
+	return validators, nil
+}
+
+func generateValidatorKeysByMnemonic(spec *common.Spec, mnemonicsConfigPath string, tranchesDir string) ([]phase0.KickstartValidatorData, error) {
 	mnemonics, err := loadMnemonics(mnemonicsConfigPath)
 	if err != nil {
 		return nil, err
@@ -135,4 +164,70 @@ func loadMnemonics(srcPath string) ([]MnemonicSrc, error) {
 		return nil, err
 	}
 	return data, nil
+}
+
+func loadValidatorsFromFile(spec *common.Spec, validatorsConfigPath string) ([]phase0.KickstartValidatorData, error) {
+	validatorsSrc, err := loadValidators(validatorsConfigPath)
+	if err != nil {
+		return nil, err
+	}
+
+	//var validators []phase0.KickstartValidatorData
+	validators := make([]phase0.KickstartValidatorData, len(validatorsSrc))
+
+	valIndex := uint64(0)
+	for _, validatorSrc := range validatorsSrc {
+		entry := strings.Split(validatorSrc, ":")
+		
+		// BLS signing key
+		var data phase0.KickstartValidatorData
+
+		// Public key
+		pubKey, err := hex.DecodeString(strings.Replace(entry[0], "0x", "", -1))
+		if err != nil {
+				return nil, err
+		}
+		copy(data.Pubkey[:], pubKey)
+
+		// Withdrawal credentials
+		withdrawalCred, err := hex.DecodeString(strings.Replace(entry[1], "0x", "", -1))
+		if err != nil {
+				return nil, err
+		}
+		copy(data.WithdrawalCredentials[:], withdrawalCred)
+
+		// Validator balance
+		if len(entry) > 2 {
+			balance, err := strconv.ParseUint(string(entry[2]), 10, 64)
+			if err != nil {
+				return nil, err
+			}
+			data.Balance = common.Gwei(balance)
+		} else {
+			data.Balance = spec.MAX_EFFECTIVE_BALANCE
+		}
+		
+		validators[valIndex] = data
+		valIndex++
+	}
+	return validators, nil
+}
+
+func loadValidators(srcPath string) ([]string, error) {
+	f, err := os.Open(srcPath)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	lines := []string{}
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line != "" {
+			lines = append(lines, line)
+		}
+	}
+
+	return lines, nil
 }
