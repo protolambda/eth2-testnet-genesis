@@ -17,16 +17,20 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 		return err
 	}
 	var forkVersion common.Version
+	var previousForkVersion common.Version
 	switch state.(type) {
 	case *bellatrix.BeaconStateView:
 		forkVersion = spec.BELLATRIX_FORK_VERSION
+		previousForkVersion = spec.ALTAIR_FORK_VERSION
 	case *altair.BeaconStateView:
 		forkVersion = spec.ALTAIR_FORK_VERSION
+		previousForkVersion = spec.GENESIS_FORK_VERSION
 	default:
 		forkVersion = spec.GENESIS_FORK_VERSION
+		previousForkVersion = spec.GENESIS_FORK_VERSION
 	}
 	if err := state.SetFork(common.Fork{
-		PreviousVersion: spec.GENESIS_FORK_VERSION,
+		PreviousVersion: previousForkVersion,
 		CurrentVersion:  forkVersion,
 		Epoch:           common.GENESIS_EPOCH,
 	}); err != nil {
