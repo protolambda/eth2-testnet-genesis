@@ -28,6 +28,7 @@ type MergeGenesisCmd struct {
 	MnemonicsSrcFilePath string `ask:"--mnemonics" help:"File with YAML of key sources"`
 	StateOutputPath      string `ask:"--state-output" help:"Output path for state file"`
 	TranchesDir          string `ask:"--tranches-dir" help:"Directory to dump lists of pubkeys of each tranche in"`
+	EthWithdrawalAddress string `ask:"--eth1-withdrawal-address" help:"Eth1 Withdrawal to set for the genesis validator set"`
 }
 
 func (g *MergeGenesisCmd) Help() string {
@@ -44,6 +45,7 @@ func (g *MergeGenesisCmd) Default() {
 	g.MnemonicsSrcFilePath = "mnemonics.yaml"
 	g.StateOutputPath = "genesis.ssz"
 	g.TranchesDir = "tranches"
+	g.EthWithdrawalAddress = "0x0000000000000000000000000000000000000000"
 }
 
 func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
@@ -106,12 +108,12 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 		return err
 	}
 
-	validators, err := loadValidatorKeys(spec, g.MnemonicsSrcFilePath, g.TranchesDir)
+	validators, err := loadValidatorKeys(spec, g.MnemonicsSrcFilePath, g.TranchesDir, g.EthWithdrawalAddress)
 	if err != nil {
 		return err
 	}
 
-	if uint64(len(validators)) < spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT {
+	if uint64(len(validators)) < uint64(spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT) {
 		fmt.Printf("WARNING: not enough validators for genesis. Key sources sum up to %d total. But need %d.\n", len(validators), spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT)
 	}
 
