@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"os"
@@ -67,10 +68,11 @@ func loadValidatorKeys(spec *common.Spec, mnemonicsConfigPath string, tranchesDi
 				} else {
 					// ETH1 withdrawal credentials
 					var paddingString = "0000000000000000000000"
-					EthWithdrawalAddress = strings.Trim(EthWithdrawalAddress, "0x")
-					tempString := paddingString + EthWithdrawalAddress
-					copy(data.WithdrawalCredentials[:], tempString)
-					fmt.Println(data.WithdrawalCredentials)
+					EthWithdrawalAddressBytes, err := hex.DecodeString(paddingString + strings.Trim(EthWithdrawalAddress, "0x"))
+					if err != nil {
+						return err
+					}
+					copy(data.WithdrawalCredentials[1:], EthWithdrawalAddressBytes)
 					data.WithdrawalCredentials[0] = common.ETH1_ADDRESS_WITHDRAWAL_PREFIX
 				}
 
