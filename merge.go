@@ -4,6 +4,9 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/holiman/uint256"
@@ -14,8 +17,6 @@ import (
 	"github.com/protolambda/ztyp/codec"
 	"github.com/protolambda/ztyp/tree"
 	"github.com/protolambda/ztyp/view"
-	"os"
-	"time"
 )
 
 type MergeGenesisCmd struct {
@@ -28,7 +29,8 @@ type MergeGenesisCmd struct {
 	MnemonicsSrcFilePath string `ask:"--mnemonics" help:"File with YAML of key sources"`
 	StateOutputPath      string `ask:"--state-output" help:"Output path for state file"`
 	TranchesDir          string `ask:"--tranches-dir" help:"Directory to dump lists of pubkeys of each tranche in"`
-	EthWithdrawalAddress string `ask:"--eth1-withdrawal-address" help:"Eth1 Withdrawal to set for the genesis validator set"`
+
+	EthWithdrawalAddress common.Eth1Address `ask:"--eth1-withdrawal-address" help:"Eth1 Withdrawal to set for the genesis validator set"`
 }
 
 func (g *MergeGenesisCmd) Help() string {
@@ -45,7 +47,6 @@ func (g *MergeGenesisCmd) Default() {
 	g.MnemonicsSrcFilePath = "mnemonics.yaml"
 	g.StateOutputPath = "genesis.ssz"
 	g.TranchesDir = "tranches"
-	g.EthWithdrawalAddress = "0x0000000000000000000000000000000000000000"
 }
 
 func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {

@@ -4,13 +4,14 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/protolambda/zrnt/eth2"
 	"github.com/protolambda/zrnt/eth2/beacon/altair"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
 	"github.com/protolambda/zrnt/eth2/configs"
 	"github.com/protolambda/ztyp/codec"
-	"os"
-	"time"
 )
 
 type AltairGenesisCmd struct {
@@ -18,9 +19,11 @@ type AltairGenesisCmd struct {
 	Eth1BlockHash        common.Root      `ask:"--eth1-block" help:"Eth1 block hash to put into state"`
 	Eth1BlockTimestamp   common.Timestamp `ask:"--timestamp" help:"Eth1 block timestamp"`
 	MnemonicsSrcFilePath string           `ask:"--mnemonics" help:"File with YAML of key sources"`
-	StateOutputPath      string           `ask:"--state-output" help:"Output path for state file"`
-	TranchesDir          string           `ask:"--tranches-dir" help:"Directory to dump lists of pubkeys of each tranche in"`
-	EthWithdrawalAddress string           `ask:"--eth1-withdrawal-address" help:"Eth1 Withdrawal to set for the genesis validator set"`
+
+	StateOutputPath string `ask:"--state-output" help:"Output path for state file"`
+	TranchesDir     string `ask:"--tranches-dir" help:"Directory to dump lists of pubkeys of each tranche in"`
+
+	EthWithdrawalAddress common.Eth1Address `ask:"--eth1-withdrawal-address" help:"Eth1 Withdrawal to set for the genesis validator set"`
 }
 
 func (g *AltairGenesisCmd) Help() string {
@@ -34,7 +37,6 @@ func (g *AltairGenesisCmd) Default() {
 	g.MnemonicsSrcFilePath = "mnemonics.yaml"
 	g.StateOutputPath = "genesis.ssz"
 	g.TranchesDir = "tranches"
-	g.EthWithdrawalAddress = "0x0000000000000000000000000000000000000000"
 }
 
 func (g *AltairGenesisCmd) Run(ctx context.Context, args ...string) error {

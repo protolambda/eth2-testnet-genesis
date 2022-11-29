@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"os"
@@ -18,7 +17,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func loadValidatorKeys(spec *common.Spec, mnemonicsConfigPath string, tranchesDir string, EthWithdrawalAddress string) ([]phase0.KickstartValidatorData, error) {
+func loadValidatorKeys(spec *common.Spec, mnemonicsConfigPath string, tranchesDir string, ethWithdrawalAddress common.Eth1Address) ([]phase0.KickstartValidatorData, error) {
 	mnemonics, err := loadMnemonics(mnemonicsConfigPath)
 	if err != nil {
 		return nil, err
@@ -59,21 +58,20 @@ func loadValidatorKeys(spec *common.Spec, mnemonicsConfigPath string, tranchesDi
 				copy(data.Pubkey[:], signingKey.PublicKey().Marshal())
 				pubs[idx] = data.Pubkey.String()
 
-				if EthWithdrawalAddress == "0x0000000000000000000000000000000000000000" {
+				if ethWithdrawalAddress == (common.Eth1Address{}) {
 					// BLS withdrawal credentials
 					h := sha256.New()
 					h.Write(withdrawalKey.PublicKey().Marshal())
 					copy(data.WithdrawalCredentials[:], h.Sum(nil))
 					data.WithdrawalCredentials[0] = common.BLS_WITHDRAWAL_PREFIX
 				} else {
-					// ETH1 withdrawal credentials
-					var paddingString = "0000000000000000000000"
-					EthWithdrawalAddressBytes, err := hex.DecodeString(paddingString + strings.Trim(EthWithdrawalAddress, "0x"))
-					if err != nil {
-						return err
-					}
-					copy(data.WithdrawalCredentials[1:], EthWithdrawalAddressBytes)
+					// spec:
+					// The withdrawal_credentials field must be such that:
+					//   withdrawal_credentials[:1] == ETH1_ADDRESS_WITHDRAWAL_PREFIX
+					//   withdrawal_credentials[1:12] == b'\x00' * 11
+					//   withdrawal_credentials[12:] == eth1_withdrawal_address
 					data.WithdrawalCredentials[0] = common.ETH1_ADDRESS_WITHDRAWAL_PREFIX
+					copy(data.WithdrawalCredentials[12:], ethWithdrawalAddress[:])
 				}
 
 				// Max effective balance by default for activation
