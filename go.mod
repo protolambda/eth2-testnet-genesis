@@ -20,11 +20,11 @@ require (
 	github.com/VictoriaMetrics/fastcache v1.7.0 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/crate-crypto/go-ipa v0.0.0-20220916134416-c5abbdbdf644 // indirect
+	github.com/crate-crypto/go-ipa v0.0.0-20221111143132-9aa5d42120bc // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
 	github.com/ferranbt/fastssz v0.0.0-20210905181407-59cf6761a7d5 // indirect
-	github.com/gballet/go-verkle v0.0.0-20220902153445-097bd83b7732 // indirect
+	github.com/gballet/go-verkle v0.0.0-20221129125207-513116151b28 // indirect
 	github.com/go-ole/go-ole v1.2.5 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
@@ -48,9 +48,9 @@ require (
 	github.com/wealdtech/go-bytesutil v1.1.1 // indirect
 	github.com/wealdtech/go-eth2-types/v2 v2.6.0 // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
-	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
+	golang.org/x/sys v0.2.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/ethereum/go-ethereum v1.10.23 => github.com/gballet/go-ethereum v1.10.24-0.20221005144906-f0e4ab07b54a
+replace github.com/ethereum/go-ethereum => github.com/gballet/go-ethereum v1.10.24-0.20221205085725-c65f6b067303
