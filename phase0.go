@@ -35,7 +35,7 @@ func (g *Phase0GenesisCmd) Default() {
 	g.Eth1BlockHash = common.Root{}
 	g.Eth1BlockTimestamp = common.Timestamp(time.Now().Unix())
 	g.MnemonicsSrcFilePath = "mnemonics.yaml"
-	g.ValidatorsSrcFilePath = "validators.txt"
+	g.ValidatorsSrcFilePath = ""
 	g.StateOutputPath = "genesis.ssz"
 	g.TranchesDir = "tranches"
 }

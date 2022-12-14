@@ -234,7 +234,7 @@ func loadValidators(srcPath string) ([]string, error) {
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if line != "" {
+		if line != "" && !strings.HasPrefix(line, "#") {
 			lines = append(lines, line)
 		}
 	}
