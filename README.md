@@ -114,7 +114,7 @@ The `mnemonics.yaml` is formatted as:
 
 ### Validators List
 
-In addition or as alternative to the mnemonic based validator generation a file with a list of validators can be specified with the `--validators` flag.
+In addition, or as alternative to the mnemonic-based validator generation a file with a list of validators can be specified with the `--validators` flag.
 
 The list of validators is formatted as:
 
@@ -132,7 +132,7 @@ The list of validators is formatted as:
 0xb744b5466a214762ee17621dc4c75d1bba16417e20755f7c9c2485ea518580be50d2c87d70cc4ac393158eb34311c9a2:010000000000000000000000000000000000000000000000000000000000dEaD
 ```
 
-A validators list can be generated seperately via:
+A validators list can be generated separately via:
 ```
 export MNEMONIC="your mnemonic"
 eth2-val-tools deposit-data --fork-version 0x00000000 --source-max 200 --source-min 0 --validators-mnemonic="$MNEMONIC" --withdrawals-mnemonic="$MNEMONIC" --as-json-list | jq ".[] | \"0x\" + .pubkey + \":\" + .withdrawal_credentials + \":32000000000\"" | tr -d '"' > validators.txt
