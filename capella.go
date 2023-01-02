@@ -7,11 +7,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/holiman/uint256"
 	"github.com/protolambda/zrnt/eth2"
-	"github.com/protolambda/zrnt/eth2/beacon/bellatrix"
+	"github.com/protolambda/zrnt/eth2/beacon/capella"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
 	"github.com/protolambda/zrnt/eth2/configs"
 	"github.com/protolambda/ztyp/codec"
@@ -19,7 +17,7 @@ import (
 	"github.com/protolambda/ztyp/view"
 )
 
-type MergeGenesisCmd struct {
+type CapellaGenesisCmd struct {
 	configs.SpecOptions `ask:"."`
 	Eth1Config          string `ask:"--eth1-config" help:"Path to config JSON for eth1. No transition yet if empty."`
 
@@ -33,11 +31,11 @@ type MergeGenesisCmd struct {
 	EthWithdrawalAddress common.Eth1Address `ask:"--eth1-withdrawal-address" help:"Eth1 Withdrawal to set for the genesis validator set"`
 }
 
-func (g *MergeGenesisCmd) Help() string {
-	return "Create genesis state for Merge beacon chain, from execution-layer (only required if post-transition) and consensus-layer configs"
+func (g *CapellaGenesisCmd) Help() string {
+	return "Create genesis state for Capella beacon chain, from execution-layer (only required if post-transition) and consensus-layer configs"
 }
 
-func (g *MergeGenesisCmd) Default() {
+func (g *CapellaGenesisCmd) Default() {
 	g.SpecOptions.Default()
 	g.Eth1Config = "engine_genesis.json"
 
@@ -49,7 +47,7 @@ func (g *MergeGenesisCmd) Default() {
 	g.TranchesDir = "tranches"
 }
 
-func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
+func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 	fmt.Printf("zrnt version: %s\n", eth2.VERSION)
 
 	spec, err := g.SpecOptions.Spec()
@@ -59,17 +57,15 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 	var eth1BlockHash common.Root
 	var eth1Timestamp common.Timestamp
-	var execHeader *common.ExecutionPayloadHeader
+	var execHeader *capella.ExecutionPayloadHeader
 	if g.Eth1Config != "" {
 		fmt.Println("using eth1 config to create and embed ExecutionPayloadHeader in genesis BeaconState")
-		var eth1Genesis *core.Genesis
 		eth1Genesis, err := loadEth1GenesisConf(g.Eth1Config)
 		if err != nil {
 			return err
 		}
 
-		eth1Db := rawdb.NewMemoryDatabase()
-		eth1GenesisBlock := eth1Genesis.ToBlock(eth1Db)
+		eth1GenesisBlock := eth1Genesis.ToBlock()
 
 		eth1BlockHash = common.Root(eth1GenesisBlock.Hash())
 		eth1Timestamp = common.Timestamp(eth1Genesis.Timestamp)
@@ -81,7 +77,7 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 		baseFee, _ := uint256.FromBig(eth1GenesisBlock.BaseFee())
 
-		execHeader = &common.ExecutionPayloadHeader{
+		execHeader = &capella.ExecutionPayloadHeader{
 			ParentHash:    common.Root(eth1GenesisBlock.ParentHash()),
 			FeeRecipient:  common.Eth1Address(eth1GenesisBlock.Coinbase()),
 			StateRoot:     common.Bytes32(eth1GenesisBlock.Root()),
@@ -102,7 +98,7 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 		fmt.Println("no eth1 config found, using eth1 block hash and timestamp, with empty ExecutionPayloadHeader (no PoW->PoS transition yet in execution layer)")
 		eth1BlockHash = g.Eth1BlockHash
 		eth1Timestamp = g.Eth1BlockTimestamp
-		execHeader = &common.ExecutionPayloadHeader{}
+		execHeader = &capella.ExecutionPayloadHeader{}
 	}
 
 	if err := os.MkdirAll(g.TranchesDir, 0777); err != nil {
@@ -118,7 +114,7 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 		fmt.Printf("WARNING: not enough validators for genesis. Key sources sum up to %d total. But need %d.\n", len(validators), spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT)
 	}
 
-	state := bellatrix.NewBeaconStateView(spec)
+	state := capella.NewBeaconStateView(spec)
 	if err := setupState(spec, state, eth1Timestamp, eth1BlockHash, validators); err != nil {
 		return err
 	}

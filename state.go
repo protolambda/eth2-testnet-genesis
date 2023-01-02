@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/protolambda/zrnt/eth2/beacon/altair"
 	"github.com/protolambda/zrnt/eth2/beacon/bellatrix"
+	"github.com/protolambda/zrnt/eth2/beacon/capella"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
 	"github.com/protolambda/zrnt/eth2/beacon/phase0"
-	"github.com/protolambda/zrnt/eth2/configs"
 	"github.com/protolambda/ztyp/tree"
 )
 
@@ -19,6 +19,9 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 	var forkVersion common.Version
 	var previousForkVersion common.Version
 	switch state.(type) {
+	case *capella.BeaconStateView:
+		forkVersion = spec.CAPELLA_FORK_VERSION
+		previousForkVersion = spec.BELLATRIX_FORK_VERSION
 	case *bellatrix.BeaconStateView:
 		forkVersion = spec.BELLATRIX_FORK_VERSION
 		previousForkVersion = spec.ALTAIR_FORK_VERSION
@@ -53,12 +56,14 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 	}
 	var emptyBody tree.HTR
 	switch state.(type) {
+	case *capella.BeaconStateView:
+		emptyBody = capella.BeaconBlockBodyType(spec).New()
 	case *bellatrix.BeaconStateView:
-		emptyBody = bellatrix.BeaconBlockBodyType(configs.Mainnet).New()
+		emptyBody = bellatrix.BeaconBlockBodyType(spec).New()
 	case *altair.BeaconStateView:
-		emptyBody = altair.BeaconBlockBodyType(configs.Mainnet).New()
+		emptyBody = altair.BeaconBlockBodyType(spec).New()
 	default:
-		emptyBody = phase0.BeaconBlockBodyType(configs.Mainnet).New()
+		emptyBody = phase0.BeaconBlockBodyType(spec).New()
 	}
 	latestHeader := &common.BeaconBlockHeader{
 		BodyRoot: emptyBody.HashTreeRoot(tree.GetHashFn()),
