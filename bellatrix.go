@@ -81,9 +81,13 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 			return fmt.Errorf("A fatal error occurred getting the ETH block %s", err)
 		}
 
+		// Set the eth1Block value for use later
 		eth1Block = resultBlock
 
+		// Convert and set the difficulty as the prevRandao field
 		prevRandaoMix = bigIntToBytes32(eth1Block.Difficulty())
+
+		// Copy the txRoot from the block
 		copy(TxRoot[:], eth1Block.TxHash().Bytes())
 
 	} else if g.Eth1Config != "" {
@@ -93,7 +97,10 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 			return err
 		}
 
+		// Generate genesis block from the loaded config
 		eth1Block = eth1Genesis.ToBlock()
+
+		// Set as default values
 		prevRandaoMix = common.Bytes32{}
 		TxRoot = common.PayloadTransactionsType(spec).DefaultNode().MerkleRoot(tree.GetHashFn())
 
