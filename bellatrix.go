@@ -65,7 +65,7 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 	var execHeader *common.ExecutionPayloadHeader
 	var eth1Block *types.Block
 	var prevRandaoMix [32]byte
-	var TxRoot tree.Root
+	var TxRoot [32]byte
 
 	if g.ShadowForkEth1RPC != "" {
 		client, err := ethclient.Dial(g.ShadowForkEth1RPC)
@@ -84,7 +84,8 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 		eth1Block = resultBlock
 
 		prevRandaoMix = bigIntToBytes32(eth1Block.Difficulty())
-		TxRoot = eth1Block.TxHash()
+		copy(TxRoot[:], eth1Block.TxHash().Bytes())
+
 	} else if g.Eth1Config != "" {
 		fmt.Println("using eth1 config to create and embed ExecutionPayloadHeader in genesis BeaconState")
 		eth1Genesis, err := loadEth1GenesisConf(g.Eth1Config)
@@ -94,8 +95,8 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 		eth1Block = eth1Genesis.ToBlock()
 		prevRandaoMix = common.Bytes32{}
-	TxRoot:
-		common.PayloadTransactionsType(spec).DefaultNode().MerkleRoot(tree.GetHashFn())
+		TxRoot = common.PayloadTransactionsType(spec).DefaultNode().MerkleRoot(tree.GetHashFn())
+
 	} else {
 		fmt.Println("no eth1 config found, using eth1 block hash and timestamp, with empty ExecutionPayloadHeader (no PoW->PoS transition yet in execution layer)")
 		eth1BlockHash = g.Eth1BlockHash
