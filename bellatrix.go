@@ -76,11 +76,12 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 		if err != nil {
 			return err
 		}
+
+		// Set beaconchain genesis timestamp based on eth1 genesis timestamp
+		beaconGenesisTimestamp = common.Timestamp(eth1Genesis.ToBlock().Time())
 	} else {
 		beaconGenesisTimestamp = g.Eth1BlockTimestamp
 	}
-
-	beaconGenesisTimestamp = common.Timestamp(eth1Genesis.ToBlock().Time())
 
 	if g.ShadowForkEth1RPC != "" {
 		client, err := ethclient.Dial(g.ShadowForkEth1RPC)
