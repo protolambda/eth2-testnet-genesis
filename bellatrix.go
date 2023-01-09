@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/types"
 	"math/big"
 	"os"
@@ -61,11 +62,26 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 	}
 
 	var eth1BlockHash common.Root
-	var eth1Timestamp common.Timestamp
+	var beaconGenesisTimestamp common.Timestamp
 	var execHeader *common.ExecutionPayloadHeader
 	var eth1Block *types.Block
 	var prevRandaoMix [32]byte
 	var TxRoot [32]byte
+	var eth1Genesis *core.Genesis
+
+	// Load the eth1 genesis config, we need it for the genesis timestamp and/or to place as the exec_payload
+	if g.Eth1Config != "" {
+		fmt.Println("using eth1 config to create and embed ExecutionPayloadHeader in genesis BeaconState")
+		eth1Genesis, err = loadEth1GenesisConf(g.Eth1Config)
+		if err != nil {
+			return err
+		}
+
+		// Set beaconchain genesis timestamp based on eth1 genesis timestamp
+		beaconGenesisTimestamp = common.Timestamp(eth1Genesis.ToBlock().Time())
+	} else {
+		beaconGenesisTimestamp = g.Eth1BlockTimestamp
+	}
 
 	if g.ShadowForkEth1RPC != "" {
 		client, err := ethclient.Dial(g.ShadowForkEth1RPC)
@@ -91,11 +107,6 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 		copy(TxRoot[:], eth1Block.TxHash().Bytes())
 
 	} else if g.Eth1Config != "" {
-		fmt.Println("using eth1 config to create and embed ExecutionPayloadHeader in genesis BeaconState")
-		eth1Genesis, err := loadEth1GenesisConf(g.Eth1Config)
-		if err != nil {
-			return err
-		}
 
 		// Generate genesis block from the loaded config
 		eth1Block = eth1Genesis.ToBlock()
@@ -107,12 +118,10 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 	} else {
 		fmt.Println("no eth1 config found, using eth1 block hash and timestamp, with empty ExecutionPayloadHeader (no PoW->PoS transition yet in execution layer)")
 		eth1BlockHash = g.Eth1BlockHash
-		eth1Timestamp = g.Eth1BlockTimestamp
 		execHeader = &common.ExecutionPayloadHeader{}
 	}
 
 	eth1BlockHash = common.Root(eth1Block.Hash())
-	eth1Timestamp = common.Timestamp(eth1Block.Time())
 
 	extra := eth1Block.Extra()
 	if len(extra) > common.MAX_EXTRA_DATA_BYTES {
@@ -153,7 +162,7 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 	}
 
 	state := bellatrix.NewBeaconStateView(spec)
-	if err := setupState(spec, state, eth1Timestamp, eth1BlockHash, validators); err != nil {
+	if err := setupState(spec, state, beaconGenesisTimestamp, eth1BlockHash, validators); err != nil {
 		return err
 	}
 
@@ -165,7 +174,7 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("eth2 genesis at %d + %d = %d  (%s)\n", eth1Timestamp, spec.GENESIS_DELAY, t, time.Unix(int64(t), 0).String())
+	fmt.Printf("eth2 genesis at %d + %d = %d  (%s)\n", beaconGenesisTimestamp, spec.GENESIS_DELAY, t, time.Unix(int64(t), 0).String())
 
 	fmt.Println("done preparing state, serializing SSZ now...")
 	f, err := os.OpenFile(g.StateOutputPath, os.O_CREATE|os.O_WRONLY, 0777)
