@@ -69,16 +69,20 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 	var TxRoot [32]byte
 	var eth1Genesis *core.Genesis
 
-	// Load the eth1 genesis config, we need it for the genesis timestamp and/or to place as the exec_payload
+	// Load the Eth1 block from the Eth1 genesis config
 	if g.Eth1Config != "" {
-		fmt.Println("using eth1 config to create and embed ExecutionPayloadHeader in genesis BeaconState")
 		eth1Genesis, err = loadEth1GenesisConf(g.Eth1Config)
 		if err != nil {
 			return err
 		}
+	}
 
-		// Set beaconchain genesis timestamp based on eth1 genesis timestamp
-		beaconGenesisTimestamp = common.Timestamp(eth1Genesis.ToBlock().Time())
+	// Load the genesis timestamp from the CL config, this is better in terms of compatibility for shadowforks
+	if spec.MIN_GENESIS_TIME != 0 {
+		fmt.Println("Using CL MIN_GENESIS_TIME for genesis timestamp")
+
+		// Set beaconchain genesis timestamp based on config genesis timestamp
+		beaconGenesisTimestamp = spec.MIN_GENESIS_TIME
 	} else {
 		beaconGenesisTimestamp = g.Eth1BlockTimestamp
 	}
