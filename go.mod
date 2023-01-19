@@ -4,9 +4,8 @@ go 1.16
 
 require (
 	github.com/VictoriaMetrics/fastcache v1.12.0 // indirect
-	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
+	github.com/crate-crypto/go-ipa v0.0.0-20230112133036-98736f2f2808 // indirect
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
@@ -25,8 +24,11 @@ require (
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/wealdtech/go-eth2-util v1.8.0
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
-	golang.org/x/crypto v0.4.0 // indirect
+	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/sync v0.1.0
-	golang.org/x/sys v0.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
 )
+
+replace github.com/ethereum/go-ethereum => github.com/gballet/go-ethereum v1.10.24-0.20230111193542-878057df8576
+
+replace github.com/protolambda/zrnt => github.com/parithosh/zrnt v0.0.0-20230119145139-20361a932abc

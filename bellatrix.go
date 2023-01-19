@@ -150,6 +150,8 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 		BlockHash:     eth1BlockHash,
 
 		TransactionsRoot: TxRoot,
+		VerkleProof:      common.Bytes32{},
+		VerkleKeyVals:    common.Bytes32{},
 	}
 
 	if err := os.MkdirAll(g.TranchesDir, 0777); err != nil {
