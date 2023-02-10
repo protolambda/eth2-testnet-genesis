@@ -53,4 +53,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace github.com/ethereum/go-ethereum => github.com/gballet/go-ethereum v1.10.24-0.20221205085725-c65f6b067303
+replace github.com/ethereum/go-ethereum => github.com/gballet/go-ethereum v1.10.24-0.20230208183144-ecf1a20169d7
