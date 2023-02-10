@@ -16,13 +16,14 @@ require (
 	github.com/protolambda/ask v0.1.2
 	github.com/protolambda/bls12-381-util v0.0.0-20210812140640-b03868185758 // indirect
 	github.com/protolambda/zrnt v0.26.0
-	github.com/protolambda/ztyp v0.2.1
+	github.com/protolambda/ztyp v0.2.2
 	github.com/shirou/gopsutil v3.21.8+incompatible // indirect
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/wealdtech/go-eth2-util v1.7.0
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
+
+replace github.com/protolambda/zrnt => github.com/gballet/zrnt v0.10.2-0.20230209193703-3b0725f8e0d2

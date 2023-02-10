@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-type MergeGenesisCmd struct {
+type VergeGenesisCmd struct {
 	configs.SpecOptions `ask:"."`
 	Eth1Config          string `ask:"--eth1-config" help:"Path to config JSON for eth1. No transition yet if empty."`
 
@@ -30,11 +30,11 @@ type MergeGenesisCmd struct {
 	TranchesDir          string `ask:"--tranches-dir" help:"Directory to dump lists of pubkeys of each tranche in"`
 }
 
-func (g *MergeGenesisCmd) Help() string {
-	return "Create genesis state for Merge beacon chain, from execution-layer (only required if post-transition) and consensus-layer configs"
+func (g *VergeGenesisCmd) Help() string {
+	return "Create genesis state for Verge beacon chain, from execution-layer (only required if post-transition) and consensus-layer configs"
 }
 
-func (g *MergeGenesisCmd) Default() {
+func (g *VergeGenesisCmd) Default() {
 	g.SpecOptions.Default()
 	g.Eth1Config = "engine_genesis.json"
 
@@ -46,7 +46,7 @@ func (g *MergeGenesisCmd) Default() {
 	g.TranchesDir = "tranches"
 }
 
-func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
+func (g *VergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 	fmt.Printf("zrnt version: %s\n", eth2.VERSION)
 
 	spec, err := g.SpecOptions.Spec()
@@ -93,7 +93,8 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 			BaseFeePerGas: view.Uint256View(*baseFee),
 			BlockHash:     eth1BlockHash,
 			// empty transactions root
-			TransactionsRoot: common.PayloadTransactionsType(spec).DefaultNode().MerkleRoot(tree.GetHashFn()),
+			TransactionsRoot:     common.PayloadTransactionsType(spec).DefaultNode().MerkleRoot(tree.GetHashFn()),
+			ExecutionWitnessRoot: common.ExecutionWitnessType.DefaultNode().MerkleRoot(tree.GetHashFn()),
 		}
 	} else {
 		fmt.Println("no eth1 config found, using eth1 block hash and timestamp, with empty ExecutionPayloadHeader (no PoW->PoS transition yet in execution layer)")

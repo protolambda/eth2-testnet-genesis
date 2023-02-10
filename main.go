@@ -27,6 +27,8 @@ func (c *GenesisCmd) Cmd(route string) (cmd interface{}, err error) {
 		cmd = &AltairGenesisCmd{}
 	case "merge":
 		cmd = &MergeGenesisCmd{}
+	case "electra":
+		cmd = &VergeGenesisCmd{}
 	default:
 		return nil, fmt.Errorf("unrecognized cmd route: %s", route)
 	}
@@ -34,7 +36,7 @@ func (c *GenesisCmd) Cmd(route string) (cmd interface{}, err error) {
 }
 
 func (c *GenesisCmd) Routes() []string {
-	return []string{"phase0", "altair", "merge"}
+	return []string{"phase0", "altair", "merge", "electra"}
 }
 
 func main() {

@@ -4,13 +4,15 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/protolambda/zrnt/eth2"
 	"github.com/protolambda/zrnt/eth2/beacon/altair"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
 	"github.com/protolambda/zrnt/eth2/configs"
 	"github.com/protolambda/ztyp/codec"
-	"os"
-	"time"
+	"github.com/protolambda/ztyp/view"
 )
 
 type AltairGenesisCmd struct {
@@ -51,7 +53,7 @@ func (g *AltairGenesisCmd) Run(ctx context.Context, args ...string) error {
 		return err
 	}
 
-	if uint64(len(validators)) < spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT {
+	if view.Uint64View(len(validators)) < spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT {
 		fmt.Printf("WARNING: not enough validators for genesis. Key sources sum up to %d total. But need %d.\n", len(validators), spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT)
 	}
 
