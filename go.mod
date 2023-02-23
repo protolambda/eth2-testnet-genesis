@@ -26,4 +26,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
-replace github.com/protolambda/zrnt => github.com/gballet/zrnt v0.10.2-0.20230223091422-c8ecac914e53
+replace github.com/protolambda/zrnt => github.com/gballet/zrnt v0.10.2-0.20230223160905-39f8f10187e2
