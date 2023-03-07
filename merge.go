@@ -55,7 +55,8 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 	var eth1BlockHash common.Root
 	var eth1Timestamp common.Timestamp
-	var execHeader *common.ExecutionPayloadHeader
+
+	var execHeader *bellatrix.ExecutionPayloadHeader
 	if g.Eth1Config != "" {
 		fmt.Println("using eth1 config to create and embed ExecutionPayloadHeader in genesis BeaconState")
 		var eth1Genesis *core.Genesis
@@ -76,28 +77,27 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 		baseFee, _ := uint256.FromBig(eth1GenesisBlock.BaseFee())
 
-		execHeader = &common.ExecutionPayloadHeader{
-			ParentHash:    common.Root(eth1GenesisBlock.ParentHash()),
-			FeeRecipient:  common.Eth1Address(eth1GenesisBlock.Coinbase()),
-			StateRoot:     common.Bytes32(eth1GenesisBlock.Root()),
-			ReceiptsRoot:  common.Bytes32(eth1GenesisBlock.ReceiptHash()),
-			LogsBloom:     common.LogsBloom(eth1GenesisBlock.Bloom()),
-			PrevRandao:    common.Bytes32{},
-			BlockNumber:   view.Uint64View(eth1GenesisBlock.NumberU64()),
-			GasLimit:      view.Uint64View(eth1GenesisBlock.GasLimit()),
-			GasUsed:       view.Uint64View(eth1GenesisBlock.GasUsed()),
-			Timestamp:     common.Timestamp(eth1GenesisBlock.Time()),
-			ExtraData:     extra,
-			BaseFeePerGas: view.Uint256View(*baseFee),
-			BlockHash:     eth1BlockHash,
-			// empty transactions root
+		execHeader = &bellatrix.ExecutionPayloadHeader{
+			ParentHash:       common.Root(eth1GenesisBlock.ParentHash()),
+			FeeRecipient:     common.Eth1Address(eth1GenesisBlock.Coinbase()),
+			StateRoot:        common.Bytes32(eth1GenesisBlock.Root()),
+			ReceiptsRoot:     common.Bytes32(eth1GenesisBlock.ReceiptHash()),
+			LogsBloom:        common.LogsBloom(eth1GenesisBlock.Bloom()),
+			PrevRandao:       common.Bytes32{},
+			BlockNumber:      view.Uint64View(eth1GenesisBlock.NumberU64()),
+			GasLimit:         view.Uint64View(eth1GenesisBlock.GasLimit()),
+			GasUsed:          view.Uint64View(eth1GenesisBlock.GasUsed()),
+			Timestamp:        common.Timestamp(eth1GenesisBlock.Time()),
+			ExtraData:        extra,
+			BaseFeePerGas:    view.Uint256View(*baseFee),
+			BlockHash:        eth1BlockHash,
 			TransactionsRoot: common.PayloadTransactionsType(spec).DefaultNode().MerkleRoot(tree.GetHashFn()),
 		}
 	} else {
 		fmt.Println("no eth1 config found, using eth1 block hash and timestamp, with empty ExecutionPayloadHeader (no PoW->PoS transition yet in execution layer)")
 		eth1BlockHash = g.Eth1BlockHash
 		eth1Timestamp = g.Eth1BlockTimestamp
-		execHeader = &common.ExecutionPayloadHeader{}
+		execHeader = &bellatrix.ExecutionPayloadHeader{}
 	}
 
 	if err := os.MkdirAll(g.TranchesDir, 0777); err != nil {
@@ -109,7 +109,7 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 		return err
 	}
 
-	if uint64(len(validators)) < spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT {
+	if view.Uint64View(len(validators)) < spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT {
 		fmt.Printf("WARNING: not enough validators for genesis. Key sources sum up to %d total. But need %d.\n", len(validators), spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT)
 	}
 
