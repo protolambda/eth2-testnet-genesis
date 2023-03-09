@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/holiman/uint256"
 	"github.com/protolambda/zrnt/eth2"
 	"github.com/protolambda/zrnt/eth2/beacon/bellatrix"
@@ -65,8 +64,7 @@ func (g *MergeGenesisCmd) Run(ctx context.Context, args ...string) error {
 			return err
 		}
 
-		eth1Db := rawdb.NewMemoryDatabase()
-		eth1GenesisBlock := eth1Genesis.ToBlock(eth1Db)
+		eth1GenesisBlock := eth1Genesis.ToBlock()
 
 		eth1BlockHash = common.Root(eth1GenesisBlock.Hash())
 		eth1Timestamp = common.Timestamp(eth1Genesis.Timestamp)
