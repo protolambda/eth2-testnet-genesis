@@ -4,11 +4,12 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
 	"math/big"
 	"os"
 	"time"
+
+	"github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/core/types"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/holiman/uint256"
@@ -63,7 +64,7 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 	var eth1BlockHash common.Root
 	var beaconGenesisTimestamp common.Timestamp
-	var execHeader *common.ExecutionPayloadHeader
+	var execHeader *bellatrix.ExecutionPayloadHeader
 	var eth1Block *types.Block
 	var prevRandaoMix [32]byte
 	var TxRoot [32]byte
@@ -122,7 +123,7 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 	} else {
 		fmt.Println("no eth1 config found, using eth1 block hash and timestamp, with empty ExecutionPayloadHeader (no PoW->PoS transition yet in execution layer)")
 		eth1BlockHash = g.Eth1BlockHash
-		execHeader = &common.ExecutionPayloadHeader{}
+		execHeader = &bellatrix.ExecutionPayloadHeader{}
 	}
 
 	eth1BlockHash = common.Root(eth1Block.Hash())
@@ -134,7 +135,7 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 	baseFee, _ := uint256.FromBig(eth1Block.BaseFee())
 
-	execHeader = &common.ExecutionPayloadHeader{
+	execHeader = &bellatrix.ExecutionPayloadHeader{
 		ParentHash:    common.Root(eth1Block.ParentHash()),
 		FeeRecipient:  common.Eth1Address(eth1Block.Coinbase()),
 		StateRoot:     common.Bytes32(eth1Block.Root()),
