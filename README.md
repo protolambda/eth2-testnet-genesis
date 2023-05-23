@@ -29,67 +29,6 @@ Sub commands:
   version    Print version and exit
 ```
 
-### Phase0
-
-```
-Create genesis state for phase0 beacon chain
-
-Flags/args:
-      --config string            Eth2 spec configuration, name or path to YAML (default "mainnet")
-      --eth1-block bytes32       Eth1 block hash to put into state (default 0000000000000000000000000000000000000000000000000000000000000000)
-      --legacy-config string     Eth2 legacy configuration (combined config and presets), name or path to YAML (default "mainnet")
-      --mnemonics string         File with YAML of key sources (default "mnemonics.yaml")
-      --validators string        File with list of validators (default "")
-      --preset-altair string     Eth2 altair spec preset, name or path to YAML (default "mainnet")
-      --preset-merge string      Eth2 merge spec preset, name or path to YAML (default "mainnet")
-      --preset-phase0 string     Eth2 phase0 spec preset, name or path to YAML (default "mainnet")
-      --preset-sharding string   Eth2 sharding spec preset, name or path to YAML (default "mainnet")
-      --state-output string      Output path for state file (default "genesis.ssz")
-      --timestamp uint           Eth1 block timestamp (default 1623884847)
-      --tranches-dir string      Directory to dump lists of pubkeys of each tranche in (default "tranches")
-```
-
-### Altair
-
-```
-Create genesis state for altair beacon chain
-
-Flags/args:
-      --config string            Eth2 spec configuration, name or path to YAML (default "mainnet")
-      --eth1-block bytes32       Eth1 block hash to put into state (default 0000000000000000000000000000000000000000000000000000000000000000)
-      --legacy-config string     Eth2 legacy configuration (combined config and presets), name or path to YAML (default "mainnet")
-      --mnemonics string         File with YAML of key sources (default "mnemonics.yaml")
-      --validators string        File with list of validators (default "")
-      --preset-altair string     Eth2 altair spec preset, name or path to YAML (default "mainnet")
-      --preset-merge string      Eth2 merge spec preset, name or path to YAML (default "mainnet")
-      --preset-phase0 string     Eth2 phase0 spec preset, name or path to YAML (default "mainnet")
-      --preset-sharding string   Eth2 sharding spec preset, name or path to YAML (default "mainnet")
-      --state-output string      Output path for state file (default "genesis.ssz")
-      --timestamp uint           Eth1 block timestamp (default 1623884908)
-      --tranches-dir string      Directory to dump lists of pubkeys of each tranche in (default "tranches")
-```
-
-### Merge
-
-```
-Create genesis state for Merge beacon chain, from execution-layer (only required if post-transition) and consensus-layer configs
-
-Flags/args:
-      --legacy-config             Eth2 legacy configuration (combined config and presets), name or path to YAML (default: mainnet) (type: string)
-      --config                    Eth2 spec configuration, name or path to YAML (default: mainnet) (type: string)
-      --preset-phase0             Eth2 phase0 spec preset, name or path to YAML (default: mainnet) (type: string)
-      --preset-altair             Eth2 altair spec preset, name or path to YAML (default: mainnet) (type: string)
-      --preset-merge              Eth2 merge spec preset, name or path to YAML (default: mainnet) (type: string)
-      --preset-sharding           Eth2 sharding spec preset, name or path to YAML (default: mainnet) (type: string)
-      --eth1-config               Path to config JSON for eth1. No transition yet if empty. (default: engine_genesis.json) (type: string)
-      --eth1-block                If not transitioned: Eth1 block hash to put into state. (default: 0000000000000000000000000000000000000000000000000000000000000000) (type: bytes32)
-      --eth1-timestamp            If not transitioned: Eth1 block timestamp (default: 1633434014) (type: uint64)
-      --mnemonics                 File with YAML of key sources (default: mnemonics.yaml) (type: string)
-      --validators string         File with list of validators (default "") (type: string)
-      --state-output              Output path for state file (default: genesis.ssz) (type: string)
-      --tranches-dir              Directory to dump lists of pubkeys of each tranche in (default: tranches) (type: string)
-```
-
 ## Common inputs
 
 ### Eth1 config
