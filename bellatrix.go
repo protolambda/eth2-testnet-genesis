@@ -30,6 +30,7 @@ type BellatrixGenesisCmd struct {
 	Eth1BlockTimestamp common.Timestamp `ask:"--eth1-timestamp" help:"If not transitioned: Eth1 block timestamp"`
 
 	MnemonicsSrcFilePath string `ask:"--mnemonics" help:"File with YAML of key sources"`
+	ValidatorsSrcFilePath string `ask:"--validators" help:"File with list of validators"`
 	StateOutputPath      string `ask:"--state-output" help:"Output path for state file"`
 	TranchesDir          string `ask:"--tranches-dir" help:"Directory to dump lists of pubkeys of each tranche in"`
 
@@ -49,6 +50,7 @@ func (g *BellatrixGenesisCmd) Default() {
 	g.Eth1BlockTimestamp = common.Timestamp(time.Now().Unix())
 
 	g.MnemonicsSrcFilePath = "mnemonics.yaml"
+	g.ValidatorsSrcFilePath = ""
 	g.StateOutputPath = "genesis.ssz"
 	g.TranchesDir = "tranches"
 	g.ShadowForkEth1RPC = ""
@@ -157,7 +159,7 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 		return err
 	}
 
-	validators, err := loadValidatorKeys(spec, g.MnemonicsSrcFilePath, g.TranchesDir, g.EthWithdrawalAddress)
+	validators, err := loadValidatorKeys(spec, g.MnemonicsSrcFilePath, g.ValidatorsSrcFilePath, g.TranchesDir, g.EthWithdrawalAddress)
 	if err != nil {
 		return err
 	}
