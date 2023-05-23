@@ -21,12 +21,12 @@ The result:
 ## Usage
 
 ```
-Create genesis state. See sub-commands for different fork versions.
-
 Sub commands:
-  phase0           Create genesis state for phase0 beacon chain
-  altair           Create genesis state for altair beacon chain
-  merge            Create genesis state for post-merge beacon chain, from eth1 and eth2 configs
+  phase0     Create genesis state for phase0 beacon chain
+  altair     Create genesis state for Altair beacon chain
+  bellatrix  Create genesis state for Bellatrix beacon chain, from execution-layer (only required if post-transition) and consensus-layer configs
+  capella    Create genesis state for Capella beacon chain, from execution-layer (only required if post-transition) and consensus-layer configs
+  version    Print version and exit
 ```
 
 ### Phase0

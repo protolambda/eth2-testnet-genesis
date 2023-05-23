@@ -27,7 +27,7 @@ type AltairGenesisCmd struct {
 }
 
 func (g *AltairGenesisCmd) Help() string {
-	return "Create genesis state for altair beacon chain"
+	return "Create genesis state for Altair beacon chain"
 }
 
 func (g *AltairGenesisCmd) Default() {
