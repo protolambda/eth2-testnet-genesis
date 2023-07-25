@@ -53,7 +53,7 @@ The `mnemonics.yaml` is formatted as:
 
 ### Validators List
 
-In addition, or as alternative to the mnemonic-based validator generation a file with a list of validators can be specified with the `--validators` flag.
+In addition, or as alternative to the mnemonic-based validator generation a file with a list of validators can be specified with the `--additional-validators` flag.
 
 The list of validators is formatted as:
 

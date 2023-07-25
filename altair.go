@@ -15,13 +15,13 @@ import (
 )
 
 type AltairGenesisCmd struct {
-	configs.SpecOptions  `ask:"."`
-	Eth1BlockHash        common.Root      `ask:"--eth1-block" help:"Eth1 block hash to put into state"`
-	Eth1BlockTimestamp   common.Timestamp `ask:"--timestamp" help:"Eth1 block timestamp"`
-	MnemonicsSrcFilePath string           `ask:"--mnemonics" help:"File with YAML of key sources"`
-	ValidatorsSrcFilePath string          `ask:"--validators" help:"File with list of validators"`
-	StateOutputPath      string           `ask:"--state-output" help:"Output path for state file"`
-	TranchesDir          string           `ask:"--tranches-dir" help:"Directory to dump lists of pubkeys of each tranche in"`
+	configs.SpecOptions   `ask:"."`
+	Eth1BlockHash         common.Root      `ask:"--eth1-block" help:"Eth1 block hash to put into state"`
+	Eth1BlockTimestamp    common.Timestamp `ask:"--timestamp" help:"Eth1 block timestamp"`
+	MnemonicsSrcFilePath  string           `ask:"--mnemonics" help:"File with YAML of key sources"`
+	ValidatorsSrcFilePath string           `ask:"--additional-validators" help:"File with list of validators"`
+	StateOutputPath       string           `ask:"--state-output" help:"Output path for state file"`
+	TranchesDir           string           `ask:"--tranches-dir" help:"Directory to dump lists of pubkeys of each tranche in"`
 
 	EthWithdrawalAddress common.Eth1Address `ask:"--eth1-withdrawal-address" help:"Eth1 Withdrawal to set for the genesis validator set"`
 }

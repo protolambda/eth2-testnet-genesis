@@ -32,7 +32,7 @@ func loadValidatorKeys(spec *common.Spec, mnemonicsConfigPath string, validators
 			validators = append(validators, val...)
 		}
 	}
-	
+
 	if validatorsListPath != "" {
 		val, err := loadValidatorsFromFile(spec, validatorsListPath)
 		if err != nil {
@@ -177,67 +177,49 @@ func loadMnemonics(srcPath string) ([]MnemonicSrc, error) {
 }
 
 func loadValidatorsFromFile(spec *common.Spec, validatorsConfigPath string) ([]phase0.KickstartValidatorData, error) {
-	validatorsSrc, err := loadValidators(validatorsConfigPath)
+	validatorsFile, err := os.Open(validatorsConfigPath)
 	if err != nil {
 		return nil, err
 	}
+	defer validatorsFile.Close()
 
-	//var validators []phase0.KickstartValidatorData
-	validators := make([]phase0.KickstartValidatorData, len(validatorsSrc))
+	validators := make([]phase0.KickstartValidatorData, 0)
+	scanner := bufio.NewScanner(validatorsFile)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
 
-	valIndex := uint64(0)
-	for _, validatorSrc := range validatorsSrc {
-		entry := strings.Split(validatorSrc, ":")
-		
-		// BLS signing key
-		var data phase0.KickstartValidatorData
+		lineParts := strings.Split(line, ":")
+		validatorEntry := phase0.KickstartValidatorData{}
 
 		// Public key
-		pubKey, err := hex.DecodeString(strings.Replace(entry[0], "0x", "", -1))
+		pubKey, err := hex.DecodeString(strings.Replace(lineParts[0], "0x", "", -1))
 		if err != nil {
-				return nil, err
+			return nil, err
 		}
-		copy(data.Pubkey[:], pubKey)
+		copy(validatorEntry.Pubkey[:], pubKey)
 
 		// Withdrawal credentials
-		withdrawalCred, err := hex.DecodeString(strings.Replace(entry[1], "0x", "", -1))
+		withdrawalCred, err := hex.DecodeString(strings.Replace(lineParts[1], "0x", "", -1))
 		if err != nil {
-				return nil, err
+			return nil, err
 		}
-		copy(data.WithdrawalCredentials[:], withdrawalCred)
+		copy(validatorEntry.WithdrawalCredentials[:], withdrawalCred)
 
 		// Validator balance
-		if len(entry) > 2 {
-			balance, err := strconv.ParseUint(string(entry[2]), 10, 64)
+		if len(lineParts) > 2 {
+			balance, err := strconv.ParseUint(string(lineParts[2]), 10, 64)
 			if err != nil {
 				return nil, err
 			}
-			data.Balance = common.Gwei(balance)
+			validatorEntry.Balance = common.Gwei(balance)
 		} else {
-			data.Balance = spec.MAX_EFFECTIVE_BALANCE
+			validatorEntry.Balance = spec.MAX_EFFECTIVE_BALANCE
 		}
-		
-		validators[valIndex] = data
-		valIndex++
+
+		validators = append(validators, validatorEntry)
 	}
 	return validators, nil
-}
-
-func loadValidators(srcPath string) ([]string, error) {
-	f, err := os.Open(srcPath)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	lines := []string{}
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if line != "" && !strings.HasPrefix(line, "#") {
-			lines = append(lines, line)
-		}
-	}
-
-	return lines, nil
 }

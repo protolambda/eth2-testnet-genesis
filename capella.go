@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/protolambda/zrnt/eth2/beacon/capella"
 	"math/big"
 	"os"
 	"time"
@@ -15,6 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/holiman/uint256"
 	"github.com/protolambda/zrnt/eth2"
+	"github.com/protolambda/zrnt/eth2/beacon/capella"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
 	"github.com/protolambda/zrnt/eth2/configs"
 	"github.com/protolambda/ztyp/codec"
@@ -29,10 +29,10 @@ type CapellaGenesisCmd struct {
 	Eth1BlockHash      common.Root      `ask:"--eth1-block" help:"If not transitioned: Eth1 block hash to put into state."`
 	Eth1BlockTimestamp common.Timestamp `ask:"--eth1-timestamp" help:"If not transitioned: Eth1 block timestamp"`
 
-	MnemonicsSrcFilePath string `ask:"--mnemonics" help:"File with YAML of key sources"`
-	ValidatorsSrcFilePath string `ask:"--validators" help:"File with list of validators"`
-	StateOutputPath      string `ask:"--state-output" help:"Output path for state file"`
-	TranchesDir          string `ask:"--tranches-dir" help:"Directory to dump lists of pubkeys of each tranche in"`
+	MnemonicsSrcFilePath  string `ask:"--mnemonics" help:"File with YAML of key sources"`
+	ValidatorsSrcFilePath string `ask:"--additional-validators" help:"File with list of additional validators"`
+	StateOutputPath       string `ask:"--state-output" help:"Output path for state file"`
+	TranchesDir           string `ask:"--tranches-dir" help:"Directory to dump lists of pubkeys of each tranche in"`
 
 	EthWithdrawalAddress common.Eth1Address `ask:"--eth1-withdrawal-address" help:"Eth1 Withdrawal to set for the genesis validator set"`
 	ShadowForkEth1RPC    string             `ask:"--shadow-fork-eth1-rpc" help:"Fetch the Eth1 block from the eth1 node for the shadow fork"`
