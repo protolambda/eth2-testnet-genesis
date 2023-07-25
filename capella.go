@@ -4,12 +4,17 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/protolambda/zrnt/eth2/beacon/capella"
+	"math/big"
 	"os"
 	"time"
 
+	"github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/core/types"
+
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/holiman/uint256"
 	"github.com/protolambda/zrnt/eth2"
-	"github.com/protolambda/zrnt/eth2/beacon/capella"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
 	"github.com/protolambda/zrnt/eth2/configs"
 	"github.com/protolambda/ztyp/codec"
@@ -30,10 +35,11 @@ type CapellaGenesisCmd struct {
 	TranchesDir          string `ask:"--tranches-dir" help:"Directory to dump lists of pubkeys of each tranche in"`
 
 	EthWithdrawalAddress common.Eth1Address `ask:"--eth1-withdrawal-address" help:"Eth1 Withdrawal to set for the genesis validator set"`
+	ShadowForkEth1RPC    string             `ask:"--shadow-fork-eth1-rpc" help:"Fetch the Eth1 block from the eth1 node for the shadow fork"`
 }
 
 func (g *CapellaGenesisCmd) Help() string {
-	return "Create genesis state for Capella beacon chain, from execution-layer (only required if post-transition) and consensus-layer configs"
+	return "Create genesis state for Capella beacon chain, from execution-layer and consensus-layer configs"
 }
 
 func (g *CapellaGenesisCmd) Default() {
@@ -47,6 +53,7 @@ func (g *CapellaGenesisCmd) Default() {
 	g.ValidatorsSrcFilePath = ""
 	g.StateOutputPath = "genesis.ssz"
 	g.TranchesDir = "tranches"
+	g.ShadowForkEth1RPC = ""
 }
 
 func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
@@ -58,49 +65,94 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 	}
 
 	var eth1BlockHash common.Root
-	var eth1Timestamp common.Timestamp
+	var beaconGenesisTimestamp common.Timestamp
 	var execHeader *capella.ExecutionPayloadHeader
+	var eth1Block *types.Block
+	var prevRandaoMix [32]byte
+	var TxRoot [32]byte
+	var eth1Genesis *core.Genesis
+
+	// Load the Eth1 block from the Eth1 genesis config
 	if g.Eth1Config != "" {
-		fmt.Println("using eth1 config to create and embed ExecutionPayloadHeader in genesis BeaconState")
-		eth1Genesis, err := loadEth1GenesisConf(g.Eth1Config)
+		eth1Genesis, err = loadEth1GenesisConf(g.Eth1Config)
 		if err != nil {
 			return err
 		}
+	}
 
-		eth1GenesisBlock := eth1Genesis.ToBlock()
+	// Load the genesis timestamp from the CL config, this is better in terms of compatibility for shadowforks
+	if spec.MIN_GENESIS_TIME != 0 {
+		fmt.Println("Using CL MIN_GENESIS_TIME for genesis timestamp")
 
-		eth1BlockHash = common.Root(eth1GenesisBlock.Hash())
-		eth1Timestamp = common.Timestamp(eth1Genesis.Timestamp)
+		// Set beaconchain genesis timestamp based on config genesis timestamp
+		beaconGenesisTimestamp = spec.MIN_GENESIS_TIME
+	} else {
+		beaconGenesisTimestamp = g.Eth1BlockTimestamp
+	}
 
-		extra := eth1GenesisBlock.Extra()
-		if len(extra) > common.MAX_EXTRA_DATA_BYTES {
-			return fmt.Errorf("extra data is %d bytes, max is %d", len(extra), common.MAX_EXTRA_DATA_BYTES)
+	if g.ShadowForkEth1RPC != "" {
+		client, err := ethclient.Dial(g.ShadowForkEth1RPC)
+		if err != nil {
+			return fmt.Errorf("A fatal error occurred creating the ETH client %s", err)
 		}
 
-		baseFee, _ := uint256.FromBig(eth1GenesisBlock.BaseFee())
-
-		execHeader = &capella.ExecutionPayloadHeader{
-			ParentHash:    common.Root(eth1GenesisBlock.ParentHash()),
-			FeeRecipient:  common.Eth1Address(eth1GenesisBlock.Coinbase()),
-			StateRoot:     common.Bytes32(eth1GenesisBlock.Root()),
-			ReceiptsRoot:  common.Bytes32(eth1GenesisBlock.ReceiptHash()),
-			LogsBloom:     common.LogsBloom(eth1GenesisBlock.Bloom()),
-			PrevRandao:    common.Bytes32{},
-			BlockNumber:   view.Uint64View(eth1GenesisBlock.NumberU64()),
-			GasLimit:      view.Uint64View(eth1GenesisBlock.GasLimit()),
-			GasUsed:       view.Uint64View(eth1GenesisBlock.GasUsed()),
-			Timestamp:     common.Timestamp(eth1GenesisBlock.Time()),
-			ExtraData:     extra,
-			BaseFeePerGas: view.Uint256View(*baseFee),
-			BlockHash:     eth1BlockHash,
-			// empty transactions root
-			TransactionsRoot: common.PayloadTransactionsType(spec).DefaultNode().MerkleRoot(tree.GetHashFn()),
+		// Get the latest block
+		blockNumberUint64, err := client.BlockNumber(ctx)
+		blockNumberBigint := new(big.Int).SetUint64(blockNumberUint64)
+		resultBlock, err := client.BlockByNumber(ctx, blockNumberBigint)
+		if err != nil {
+			return fmt.Errorf("A fatal error occurred getting the ETH block %s", err)
 		}
+
+		// Set the eth1Block value for use later
+		eth1Block = resultBlock
+
+		// Convert and set the difficulty as the prevRandao field
+		prevRandaoMix = bigIntToBytes32(eth1Block.Difficulty())
+
+		// Copy the txRoot from the block
+		copy(TxRoot[:], eth1Block.TxHash().Bytes())
+
+	} else if g.Eth1Config != "" {
+
+		// Generate genesis block from the loaded config
+		eth1Block = eth1Genesis.ToBlock()
+
+		// Set as default values
+		prevRandaoMix = common.Bytes32{}
+		TxRoot = common.PayloadTransactionsType(spec).DefaultNode().MerkleRoot(tree.GetHashFn())
+
 	} else {
 		fmt.Println("no eth1 config found, using eth1 block hash and timestamp, with empty ExecutionPayloadHeader (no PoW->PoS transition yet in execution layer)")
 		eth1BlockHash = g.Eth1BlockHash
-		eth1Timestamp = g.Eth1BlockTimestamp
 		execHeader = &capella.ExecutionPayloadHeader{}
+	}
+
+	eth1BlockHash = common.Root(eth1Block.Hash())
+
+	extra := eth1Block.Extra()
+	if len(extra) > common.MAX_EXTRA_DATA_BYTES {
+		return fmt.Errorf("extra data is %d bytes, max is %d", len(extra), common.MAX_EXTRA_DATA_BYTES)
+	}
+
+	baseFee, _ := uint256.FromBig(eth1Block.BaseFee())
+
+	execHeader = &capella.ExecutionPayloadHeader{
+		ParentHash:    common.Root(eth1Block.ParentHash()),
+		FeeRecipient:  common.Eth1Address(eth1Block.Coinbase()),
+		StateRoot:     common.Bytes32(eth1Block.Root()),
+		ReceiptsRoot:  common.Bytes32(eth1Block.ReceiptHash()),
+		LogsBloom:     common.LogsBloom(eth1Block.Bloom()),
+		PrevRandao:    prevRandaoMix,
+		BlockNumber:   view.Uint64View(eth1Block.NumberU64()),
+		GasLimit:      view.Uint64View(eth1Block.GasLimit()),
+		GasUsed:       view.Uint64View(eth1Block.GasUsed()),
+		Timestamp:     common.Timestamp(eth1Block.Time()),
+		ExtraData:     extra,
+		BaseFeePerGas: view.Uint256View(*baseFee),
+		BlockHash:     eth1BlockHash,
+
+		TransactionsRoot: TxRoot,
 	}
 
 	if err := os.MkdirAll(g.TranchesDir, 0777); err != nil {
@@ -117,7 +169,7 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 	}
 
 	state := capella.NewBeaconStateView(spec)
-	if err := setupState(spec, state, eth1Timestamp, eth1BlockHash, validators); err != nil {
+	if err := setupState(spec, state, beaconGenesisTimestamp, eth1BlockHash, validators); err != nil {
 		return err
 	}
 
@@ -129,7 +181,7 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("eth2 genesis at %d + %d = %d  (%s)\n", eth1Timestamp, spec.GENESIS_DELAY, t, time.Unix(int64(t), 0).String())
+	fmt.Printf("eth2 genesis at %d + %d = %d  (%s)\n", beaconGenesisTimestamp, spec.GENESIS_DELAY, t, time.Unix(int64(t), 0).String())
 
 	fmt.Println("done preparing state, serializing SSZ now...")
 	f, err := os.OpenFile(g.StateOutputPath, os.O_CREATE|os.O_WRONLY, 0777)
