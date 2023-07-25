@@ -51,6 +51,32 @@ The `mnemonics.yaml` is formatted as:
 # ... more
 ```
 
+### Validators List
+
+In addition, or as alternative to the mnemonic-based validator generation a file with a list of validators can be specified with the `--additional-validators` flag.
+
+The list of validators is formatted as:
+
+```text
+# <validator pubkey>:<withdrawal credentials>[:<balance>]
+0x9824e447621e4b3bca7794b91c664cc0b43322a70b1881b2f804e3a990a3965a64bfe7f098cb4c0396cd0c89218de0b4:001547805ff0547da9e51a7463a6a0c603eeda01dd930f7016185f0642b9ecaf:32000000000
+0xace5689384f87725790499fb5261b586d7dfb7d86058f0a909856272ba02df9929dcdb4b1ea529b02b948b3a1dca4d57:008aa7b9c37bf27e7c49a3185a3e721c7a02c94da7a0b6ad5f88f1b0477d3b88:32000000000
+# ... more
+
+# balance is optional and defaults to 32000000000:
+0xa33dfc09b4031e8c520469024c0ef419cc148f71d7b9501f58f2e54fc644462f208119791e57c5c9b33bf5e47f705060:00b84654c946dc68b353384426a29a3c5d736d9f751c192d5038206e93f79d73
+
+# individual 0x01 credentials can be set:
+0x82fc9f31d6e768c57d09483e788b24444235f64d2cae5f2f8a9dd28b6e8ed6636a5f378febc762cfcd9f8ab808286608:010000000000000000000000CcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC
+0xb744b5466a214762ee17621dc4c75d1bba16417e20755f7c9c2485ea518580be50d2c87d70cc4ac393158eb34311c9a2:010000000000000000000000000000000000000000000000000000000000dEaD
+```
+
+A validators list can be generated separately via:
+```
+export MNEMONIC="your mnemonic"
+eth2-val-tools deposit-data --fork-version 0x00000000 --source-max 200 --source-min 0 --validators-mnemonic="$MNEMONIC" --withdrawals-mnemonic="$MNEMONIC" --as-json-list | jq ".[] | \"0x\" + .pubkey + \":\" + .withdrawal_credentials + \":32000000000\"" | tr -d '"' > validators.txt
+``` 
+
 ## Outputs
 
 The output will be:
