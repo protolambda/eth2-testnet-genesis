@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -220,6 +221,17 @@ func loadValidatorsFromFile(spec *common.Spec, validatorsConfigPath string) ([]p
 		}
 		if len(withdrawalCred) != 32 {
 			return nil, errors.New(fmt.Sprintf("invalid withdrawal credentials (invalid length) on line %v", lineNum))
+		}
+		switch withdrawalCred[0] {
+		case 0x00:
+			break
+		case 0x01:
+			if !bytes.Equal(withdrawalCred[1:12], []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}) {
+				return nil, errors.New(fmt.Sprintf("invalid withdrawal credentials (invalid 0x01 cred) on line %v", lineNum))
+			}
+			break
+		default:
+			return nil, errors.New(fmt.Sprintf("invalid withdrawal credentials (invalid type) on line %v", lineNum))
 		}
 		copy(validatorEntry.WithdrawalCredentials[:], withdrawalCred)
 
