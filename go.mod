@@ -25,7 +25,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cockroachdb/errors v1.11.1 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
-	github.com/cockroachdb/pebble v0.0.0-20230922144958-86593692e09f // indirect
+	github.com/cockroachdb/pebble v0.0.0-20230926191106-14b8ccdc517d // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
 	github.com/consensys/bavard v0.1.13 // indirect
@@ -58,8 +58,8 @@ require (
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/prometheus/client_golang v1.16.0 // indirect
-	github.com/prometheus/client_model v0.4.0 // indirect
+	github.com/prometheus/client_golang v1.17.0 // indirect
+	github.com/prometheus/client_model v0.4.1-0.20230718164431-9a2bf3000d16 // indirect
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/protolambda/bls12-381-util v0.0.0-20220416220906-d8552aa452c7 // indirect
@@ -87,4 +87,4 @@ require (
 
 replace github.com/protolambda/zrnt => github.com/gballet/zrnt v0.10.2-0.20230922082911-972190796be5
 
-replace github.com/ethereum/go-ethereum => github.com/gballet/go-ethereum v1.10.24-0.20230925152730-3e6b0058fc1d
+replace github.com/ethereum/go-ethereum => github.com/gballet/go-ethereum v1.10.24-0.20230927100202-7d66867887b6
