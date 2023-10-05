@@ -153,6 +153,7 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 		BlockHash:     eth1BlockHash,
 
 		TransactionsRoot: TxRoot,
+		WithdrawalsRoot:  common.Root{},
 	}
 
 	if err := os.MkdirAll(g.TranchesDir, 0777); err != nil {

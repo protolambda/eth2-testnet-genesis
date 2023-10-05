@@ -138,21 +138,21 @@ func (g *VerkleGenesisCmd) Run(ctx context.Context, args ...string) error {
 	baseFee, _ := uint256.FromBig(eth1Block.BaseFee())
 
 	execHeader = &verkle.ExecutionPayloadHeader{
-		ParentHash:    common.Root(eth1Block.ParentHash()),
-		FeeRecipient:  common.Eth1Address(eth1Block.Coinbase()),
-		StateRoot:     common.Bytes32(eth1Block.Root()),
-		ReceiptsRoot:  common.Bytes32(eth1Block.ReceiptHash()),
-		LogsBloom:     common.LogsBloom(eth1Block.Bloom()),
-		PrevRandao:    prevRandaoMix,
-		BlockNumber:   view.Uint64View(eth1Block.NumberU64()),
-		GasLimit:      view.Uint64View(eth1Block.GasLimit()),
-		GasUsed:       view.Uint64View(eth1Block.GasUsed()),
-		Timestamp:     common.Timestamp(eth1Block.Time()),
-		ExtraData:     extra,
-		BaseFeePerGas: view.Uint256View(*baseFee),
-		BlockHash:     eth1BlockHash,
-
+		ParentHash:           common.Root(eth1Block.ParentHash()),
+		FeeRecipient:         common.Eth1Address(eth1Block.Coinbase()),
+		StateRoot:            common.Bytes32(eth1Block.Root()),
+		ReceiptsRoot:         common.Bytes32(eth1Block.ReceiptHash()),
+		LogsBloom:            common.LogsBloom(eth1Block.Bloom()),
+		PrevRandao:           prevRandaoMix,
+		BlockNumber:          view.Uint64View(eth1Block.NumberU64()),
+		GasLimit:             view.Uint64View(eth1Block.GasLimit()),
+		GasUsed:              view.Uint64View(eth1Block.GasUsed()),
+		Timestamp:            common.Timestamp(eth1Block.Time()),
+		ExtraData:            extra,
+		BaseFeePerGas:        view.Uint256View(*baseFee),
+		BlockHash:            eth1BlockHash,
 		TransactionsRoot:     TxRoot,
+		WithdrawalsRoot:      common.Root{},
 		ExecutionWitnessRoot: verkle.ExecutionWitnessType.DefaultNode().MerkleRoot(tree.GetHashFn()),
 	}
 
