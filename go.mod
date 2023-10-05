@@ -83,6 +83,14 @@ require (
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
 
+// golang
 replace github.com/protolambda/zrnt => github.com/gballet/zrnt v0.10.2-0.20230922082911-972190796be5
 
-replace github.com/ethereum/go-ethereum => github.com/gballet/go-ethereum v1.10.24-0.20230831152958-79d23d08544f
+// is a gigantic
+replace github.com/ethereum/go-ethereum => github.com/gballet/go-ethereum v1.10.24-0.20230925152730-3e6b0058fc1d
+
+// heap
+replace github.com/cockroachdb/pebble => github.com/cockroachdb/pebble v0.0.0-20230209160836-829675f94811
+
+// of crap
+replace golang.org/x/exp => golang.org/x/exp v0.0.0-20230515195305-f3d0a9c9a5cc
