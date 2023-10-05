@@ -26,7 +26,6 @@ require (
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
 	github.com/cockroachdb/pebble v0.0.0-20230926191106-14b8ccdc517d // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
-	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
 	github.com/consensys/bavard v0.1.13 // indirect
 	github.com/consensys/gnark-crypto v0.11.3-0.20230906172141-49815a21349a // indirect
 	github.com/crate-crypto/go-ipa v0.0.0-20230914135612-d1b03fcb8e58 // indirect
@@ -84,7 +83,7 @@ require (
 )
 
 // golang
-replace github.com/protolambda/zrnt => github.com/gballet/zrnt v0.10.2-0.20230922082911-972190796be5
+replace github.com/protolambda/zrnt => github.com/gballet/zrnt verkle-proofs-with-capella
 
 // is a gigantic
 replace github.com/ethereum/go-ethereum => github.com/gballet/go-ethereum v1.10.24-0.20230925152730-3e6b0058fc1d
