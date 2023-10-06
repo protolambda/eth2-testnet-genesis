@@ -83,7 +83,7 @@ require (
 )
 
 // golang
-replace github.com/protolambda/zrnt => github.com/gballet/zrnt v0.10.2-0.20231005133106-c89df85f6245
+replace github.com/protolambda/zrnt => github.com/gballet/zrnt v0.10.2-0.20231006074444-a610beb530dd
 
 // is a gigantic
 replace github.com/ethereum/go-ethereum => github.com/gballet/go-ethereum v1.10.24-0.20230925152730-3e6b0058fc1d
