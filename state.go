@@ -61,6 +61,8 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 	}
 	var emptyBody tree.HTR
 	switch state.(type) {
+	case *verkle.BeaconStateView:
+		emptyBody = verkle.BeaconBlockBodyType(spec).New()
 	case *capella.BeaconStateView:
 		emptyBody = capella.BeaconBlockBodyType(spec).New()
 	case *bellatrix.BeaconStateView:
