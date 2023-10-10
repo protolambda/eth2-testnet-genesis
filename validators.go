@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -184,9 +185,13 @@ func loadValidatorsFromFile(spec *common.Spec, validatorsConfigPath string) ([]p
 	defer validatorsFile.Close()
 
 	validators := make([]phase0.KickstartValidatorData, 0)
+	pubkeyMap := map[string]int{}
+
 	scanner := bufio.NewScanner(validatorsFile)
+	lineNum := 0
 	for scanner.Scan() {
 		line := scanner.Text()
+		lineNum++
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
@@ -199,12 +204,34 @@ func loadValidatorsFromFile(spec *common.Spec, validatorsConfigPath string) ([]p
 		if err != nil {
 			return nil, err
 		}
+		if len(pubKey) != 48 {
+			return nil, errors.New(fmt.Sprintf("invalid pubkey (invalid length) on line %v", lineNum))
+		}
+		if pubkeyMap[string(pubKey)] != 0 {
+			return nil, errors.New(fmt.Sprintf("duplicate pubkey on line %v and %v", pubkeyMap[string(pubKey)], lineNum))
+		}
+
+		pubkeyMap[string(pubKey)] = lineNum
 		copy(validatorEntry.Pubkey[:], pubKey)
 
 		// Withdrawal credentials
 		withdrawalCred, err := hex.DecodeString(strings.Replace(lineParts[1], "0x", "", -1))
 		if err != nil {
 			return nil, err
+		}
+		if len(withdrawalCred) != 32 {
+			return nil, errors.New(fmt.Sprintf("invalid withdrawal credentials (invalid length) on line %v", lineNum))
+		}
+		switch withdrawalCred[0] {
+		case 0x00:
+			break
+		case 0x01:
+			if !bytes.Equal(withdrawalCred[1:12], []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}) {
+				return nil, errors.New(fmt.Sprintf("invalid withdrawal credentials (invalid 0x01 cred) on line %v", lineNum))
+			}
+			break
+		default:
+			return nil, errors.New(fmt.Sprintf("invalid withdrawal credentials (invalid type) on line %v", lineNum))
 		}
 		copy(validatorEntry.WithdrawalCredentials[:], withdrawalCred)
 
