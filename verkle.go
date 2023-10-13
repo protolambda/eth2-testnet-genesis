@@ -117,6 +117,7 @@ func (g *VerkleGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 		// Generate genesis block from the loaded config
 		eth1Block = eth1Genesis.ToBlock()
+		fmt.Println("genesis block: ", eth1Block)
 
 		// Set as default values
 		prevRandaoMix = common.Bytes32{}
@@ -129,6 +130,7 @@ func (g *VerkleGenesisCmd) Run(ctx context.Context, args ...string) error {
 	}
 
 	eth1BlockHash = common.Root(eth1Block.Hash())
+	fmt.Printf("eth1 block hash=%x\n", eth1BlockHash)
 
 	extra := eth1Block.Extra()
 	if len(extra) > common.MAX_EXTRA_DATA_BYTES {
