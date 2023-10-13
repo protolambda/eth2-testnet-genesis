@@ -11,7 +11,7 @@ require (
 	github.com/protolambda/ztyp v0.2.3-0.20230210160528-a0236251c773
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/wealdtech/go-eth2-util v1.8.2
-	golang.org/x/sync v0.3.0
+	golang.org/x/sync v0.4.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -27,14 +27,14 @@ require (
 	github.com/cockroachdb/pebble v0.0.0-20230926191106-14b8ccdc517d // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/consensys/bavard v0.1.13 // indirect
-	github.com/consensys/gnark-crypto v0.11.3-0.20230906172141-49815a21349a // indirect
+	github.com/consensys/gnark-crypto v0.12.1 // indirect
 	github.com/crate-crypto/go-ipa v0.0.0-20230914135612-d1b03fcb8e58 // indirect
 	github.com/crate-crypto/go-kzg-4844 v0.3.0 // indirect
 	github.com/deckarep/golang-set/v2 v2.3.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/ethereum/c-kzg-4844 v0.3.0 // indirect
 	github.com/ferranbt/fastssz v0.1.3 // indirect
-	github.com/gballet/go-verkle v0.1.1-0.20230921190644-1a60d228f7b2 // indirect
+	github.com/gballet/go-verkle v0.1.1-0.20231004173727-0a4e93ed640b // indirect
 	github.com/getsentry/sentry-go v0.24.1 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
@@ -74,7 +74,7 @@ require (
 	golang.org/x/crypto v0.13.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/net v0.15.0 // indirect
-	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
@@ -86,7 +86,7 @@ require (
 replace github.com/protolambda/zrnt => github.com/gballet/zrnt v0.10.2-0.20231006074444-a610beb530dd
 
 // is a gigantic
-replace github.com/ethereum/go-ethereum => github.com/gballet/go-ethereum v1.10.24-0.20230925152730-3e6b0058fc1d
+replace github.com/ethereum/go-ethereum => github.com/gballet/go-ethereum v1.10.24-0.20231012153702-fc5410b0f541
 
 // heap
 replace github.com/cockroachdb/pebble => github.com/cockroachdb/pebble v0.0.0-20230209160836-829675f94811
