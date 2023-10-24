@@ -65,6 +65,18 @@ eth2-testnet-genesis capella --config=config.yaml --eth1-config="genesis.json" -
 - An alternate approach to get this information is to use `zcli`. E.g: `zcli pretty <bellatrix/capella>  BeaconState genesis.ssz > parsedState.json`
 - If you want to fetch the EL block to embed in the genesis state from a live node, you can run the tool with the flag `--shadow-fork-eth1-rpc=http://<EL-JSON-RPC-URL>`
 
+### Mnemonics
+
+The `mnemonics.yaml` is formatted as:
+
+```yaml
+- mnemonic: "reward base tuna ..."  # a 24 word BIP 39 mnemonic
+  count: 100  # amount of validators
+- mnemonic: "hint dizzy fog ..."
+  count: 9000
+# ... more
+```
+
 ### Validators List
 
 In addition, or as alternative to the mnemonic-based validator generation a file with a list of validators can be specified with the `--additional-validators` flag.
