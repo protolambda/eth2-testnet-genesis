@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/protolambda/zrnt/eth2/beacon/verkle"
 	"math/big"
 	"os"
 	"time"
@@ -14,7 +15,6 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/holiman/uint256"
 	"github.com/protolambda/zrnt/eth2"
-	"github.com/protolambda/zrnt/eth2/beacon/capella"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
 	"github.com/protolambda/zrnt/eth2/configs"
 	"github.com/protolambda/ztyp/codec"
@@ -22,7 +22,7 @@ import (
 	"github.com/protolambda/ztyp/view"
 )
 
-type CapellaGenesisCmd struct {
+type VerkleGenesisCmd struct {
 	configs.SpecOptions `ask:"."`
 	Eth1Config          string `ask:"--eth1-config" help:"Path to config JSON for eth1. No transition yet if empty."`
 
@@ -38,11 +38,11 @@ type CapellaGenesisCmd struct {
 	ShadowForkEth1RPC    string             `ask:"--shadow-fork-eth1-rpc" help:"Fetch the Eth1 block from the eth1 node for the shadow fork"`
 }
 
-func (g *CapellaGenesisCmd) Help() string {
-	return "Create genesis state for Capella beacon chain, from execution-layer and consensus-layer configs"
+func (g *VerkleGenesisCmd) Help() string {
+	return "Create genesis state for verkle beacon chain, from execution-layer and consensus-layer configs"
 }
 
-func (g *CapellaGenesisCmd) Default() {
+func (g *VerkleGenesisCmd) Default() {
 	g.SpecOptions.Default()
 	g.Eth1Config = "engine_genesis.json"
 
@@ -56,7 +56,7 @@ func (g *CapellaGenesisCmd) Default() {
 	g.ShadowForkEth1RPC = ""
 }
 
-func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
+func (g *VerkleGenesisCmd) Run(ctx context.Context, args ...string) error {
 	fmt.Printf("zrnt version: %s\n", eth2.VERSION)
 
 	spec, err := g.SpecOptions.Spec()
@@ -66,7 +66,7 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 	var eth1BlockHash common.Root
 	var beaconGenesisTimestamp common.Timestamp
-	var execHeader *capella.ExecutionPayloadHeader
+	var execHeader *verkle.ExecutionPayloadHeader
 	var eth1Block *types.Block
 	var prevRandaoMix [32]byte
 	var TxRoot [32]byte
@@ -117,6 +117,7 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 		// Generate genesis block from the loaded config
 		eth1Block = eth1Genesis.ToBlock()
+		fmt.Println("genesis block: ", eth1Block.Header())
 
 		// Set as default values
 		prevRandaoMix = common.Bytes32{}
@@ -125,10 +126,11 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 	} else {
 		fmt.Println("no eth1 config found, using eth1 block hash and timestamp, with empty ExecutionPayloadHeader (no PoW->PoS transition yet in execution layer)")
 		eth1BlockHash = g.Eth1BlockHash
-		execHeader = &capella.ExecutionPayloadHeader{}
+		execHeader = &verkle.ExecutionPayloadHeader{}
 	}
 
 	eth1BlockHash = common.Root(eth1Block.Hash())
+	fmt.Println("eth1 block hash", eth1BlockHash)
 
 	extra := eth1Block.Extra()
 	if len(extra) > common.MAX_EXTRA_DATA_BYTES {
@@ -137,23 +139,23 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 	baseFee, _ := uint256.FromBig(eth1Block.BaseFee())
 
-	execHeader = &capella.ExecutionPayloadHeader{
-		ParentHash:    common.Root(eth1Block.ParentHash()),
-		FeeRecipient:  common.Eth1Address(eth1Block.Coinbase()),
-		StateRoot:     common.Bytes32(eth1Block.Root()),
-		ReceiptsRoot:  common.Bytes32(eth1Block.ReceiptHash()),
-		LogsBloom:     common.LogsBloom(eth1Block.Bloom()),
-		PrevRandao:    prevRandaoMix,
-		BlockNumber:   view.Uint64View(eth1Block.NumberU64()),
-		GasLimit:      view.Uint64View(eth1Block.GasLimit()),
-		GasUsed:       view.Uint64View(eth1Block.GasUsed()),
-		Timestamp:     common.Timestamp(eth1Block.Time()),
-		ExtraData:     extra,
-		BaseFeePerGas: view.Uint256View(*baseFee),
-		BlockHash:     eth1BlockHash,
-
-		TransactionsRoot: TxRoot,
-		WithdrawalsRoot:  common.Root{},
+	execHeader = &verkle.ExecutionPayloadHeader{
+		ParentHash:           common.Root(eth1Block.ParentHash()),
+		FeeRecipient:         common.Eth1Address(eth1Block.Coinbase()),
+		StateRoot:            common.Bytes32(eth1Block.Root()),
+		ReceiptsRoot:         common.Bytes32(eth1Block.ReceiptHash()),
+		LogsBloom:            common.LogsBloom(eth1Block.Bloom()),
+		PrevRandao:           prevRandaoMix,
+		BlockNumber:          view.Uint64View(eth1Block.NumberU64()),
+		GasLimit:             view.Uint64View(eth1Block.GasLimit()),
+		GasUsed:              view.Uint64View(eth1Block.GasUsed()),
+		Timestamp:            common.Timestamp(eth1Block.Time()),
+		ExtraData:            extra,
+		BaseFeePerGas:        view.Uint256View(*baseFee),
+		BlockHash:            eth1BlockHash,
+		TransactionsRoot:     TxRoot,
+		WithdrawalsRoot:      common.Root{},
+		ExecutionWitnessRoot: verkle.ExecutionWitnessType.DefaultNode().MerkleRoot(tree.GetHashFn()),
 	}
 
 	if err := os.MkdirAll(g.TranchesDir, 0777); err != nil {
@@ -169,7 +171,7 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 		fmt.Printf("WARNING: not enough validators for genesis. Key sources sum up to %d total. But need %d.\n", len(validators), spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT)
 	}
 
-	state := capella.NewBeaconStateView(spec)
+	state := verkle.NewBeaconStateView(spec)
 	if err := setupState(spec, state, beaconGenesisTimestamp, eth1BlockHash, validators); err != nil {
 		return err
 	}

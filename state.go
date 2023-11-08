@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/protolambda/zrnt/eth2/beacon/altair"
 	"github.com/protolambda/zrnt/eth2/beacon/bellatrix"
 	"github.com/protolambda/zrnt/eth2/beacon/capella"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
 	"github.com/protolambda/zrnt/eth2/beacon/phase0"
+	"github.com/protolambda/zrnt/eth2/beacon/verkle"
 	"github.com/protolambda/ztyp/tree"
 )
 
@@ -19,6 +21,9 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 	var forkVersion common.Version
 	var previousForkVersion common.Version
 	switch state.(type) {
+	case *verkle.BeaconStateView:
+		forkVersion = spec.ELECTRA_FORK_VERSION
+		previousForkVersion = spec.ELECTRA_FORK_VERSION
 	case *capella.BeaconStateView:
 		forkVersion = spec.CAPELLA_FORK_VERSION
 		previousForkVersion = spec.BELLATRIX_FORK_VERSION
@@ -56,6 +61,8 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 	}
 	var emptyBody tree.HTR
 	switch state.(type) {
+	case *verkle.BeaconStateView:
+		emptyBody = verkle.BeaconBlockBodyType(spec).New()
 	case *capella.BeaconStateView:
 		emptyBody = capella.BeaconBlockBodyType(spec).New()
 	case *bellatrix.BeaconStateView:
