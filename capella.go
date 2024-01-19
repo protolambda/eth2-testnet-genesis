@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/hex"
 	"fmt"
 	"math/big"
 	"os"
@@ -182,6 +183,19 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 		return err
 	}
 	fmt.Printf("eth2 genesis at %d + %d = %d  (%s)\n", beaconGenesisTimestamp, spec.GENESIS_DELAY, t, time.Unix(int64(t), 0).String())
+
+	historicalRoots, err := state.HistoricalRoots()
+	if err != nil {
+		return err
+	}
+
+	newHistoricalRootBytes, _ := hex.DecodeString("4242424242424242424242424242424242424242424242424242424242424242")
+	newHistoricalRoot := common.Root{}
+	copy(newHistoricalRoot[:], newHistoricalRootBytes)
+	err = historicalRoots.Append(newHistoricalRoot)
+	if err != nil {
+		return err
+	}
 
 	fmt.Println("done preparing state, serializing SSZ now...")
 	f, err := os.OpenFile(g.StateOutputPath, os.O_CREATE|os.O_WRONLY, 0777)
