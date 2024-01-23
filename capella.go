@@ -29,6 +29,8 @@ type CapellaGenesisCmd struct {
 	Eth1BlockHash      common.Root      `ask:"--eth1-block" help:"If not transitioned: Eth1 block hash to put into state."`
 	Eth1BlockTimestamp common.Timestamp `ask:"--eth1-timestamp" help:"If not transitioned: Eth1 block timestamp"`
 
+	EthMatchGenesisTime bool `ask:"--eth1-match-genesis-time" help:"Use execution-layer genesis time as beacon genesis time. Overrides other genesis time settings."`
+
 	MnemonicsSrcFilePath  string `ask:"--mnemonics" help:"File with YAML of key sources"`
 	ValidatorsSrcFilePath string `ask:"--additional-validators" help:"File with list of additional validators"`
 	StateOutputPath       string `ask:"--state-output" help:"Output path for state file"`
@@ -69,7 +71,7 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 	var execHeader *capella.ExecutionPayloadHeader
 	var eth1Block *types.Block
 	var prevRandaoMix [32]byte
-	var TxRoot [32]byte
+	var txsRoot common.Root
 	var eth1Genesis *core.Genesis
 
 	// Load the Eth1 block from the Eth1 genesis config
@@ -80,8 +82,10 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 		}
 	}
 
-	// Load the genesis timestamp from the CL config, this is better in terms of compatibility for shadowforks
-	if spec.MIN_GENESIS_TIME != 0 {
+	if g.EthMatchGenesisTime && eth1Genesis != nil {
+		beaconGenesisTimestamp = common.Timestamp(eth1Genesis.Timestamp)
+	} else if spec.MIN_GENESIS_TIME != 0 {
+		// Load the genesis timestamp from the CL config, this is better in terms of compatibility for shadowforks
 		fmt.Println("Using CL MIN_GENESIS_TIME for genesis timestamp")
 
 		// Set beaconchain genesis timestamp based on config genesis timestamp
@@ -110,9 +114,18 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 		// Convert and set the difficulty as the prevRandao field
 		prevRandaoMix = bigIntToBytes32(eth1Block.Difficulty())
 
-		// Copy the txRoot from the block
-		copy(TxRoot[:], eth1Block.TxHash().Bytes())
-
+		// Compute the SSZ hash-tree-root of the transactions,
+		// since that is what we put as transactions_root in the CL execution-payload.
+		// Not to be confused with the legacy MPT root in the EL block header.
+		clTransactions := make(common.PayloadTransactions, len(eth1Block.Transactions()))
+		for i, tx := range eth1Block.Transactions() {
+			opaqueTx, err := tx.MarshalBinary()
+			if err != nil {
+				return fmt.Errorf("failed to encode tx %d: %w", i, err)
+			}
+			clTransactions[i] = opaqueTx
+		}
+		txsRoot = clTransactions.HashTreeRoot(spec, tree.GetHashFn())
 	} else if g.Eth1Config != "" {
 
 		// Generate genesis block from the loaded config
@@ -120,7 +133,7 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 		// Set as default values
 		prevRandaoMix = common.Bytes32{}
-		TxRoot = common.PayloadTransactionsType(spec).DefaultNode().MerkleRoot(tree.GetHashFn())
+		txsRoot = common.PayloadTransactionsType(spec).DefaultNode().MerkleRoot(tree.GetHashFn())
 
 	} else {
 		fmt.Println("no eth1 config found, using eth1 block hash and timestamp, with empty ExecutionPayloadHeader (no PoW->PoS transition yet in execution layer)")
@@ -137,22 +150,39 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 	baseFee, _ := uint256.FromBig(eth1Block.BaseFee())
 
-	execHeader = &capella.ExecutionPayloadHeader{
-		ParentHash:    common.Root(eth1Block.ParentHash()),
-		FeeRecipient:  common.Eth1Address(eth1Block.Coinbase()),
-		StateRoot:     common.Bytes32(eth1Block.Root()),
-		ReceiptsRoot:  common.Bytes32(eth1Block.ReceiptHash()),
-		LogsBloom:     common.LogsBloom(eth1Block.Bloom()),
-		PrevRandao:    prevRandaoMix,
-		BlockNumber:   view.Uint64View(eth1Block.NumberU64()),
-		GasLimit:      view.Uint64View(eth1Block.GasLimit()),
-		GasUsed:       view.Uint64View(eth1Block.GasUsed()),
-		Timestamp:     common.Timestamp(eth1Block.Time()),
-		ExtraData:     extra,
-		BaseFeePerGas: view.Uint256View(*baseFee),
-		BlockHash:     eth1BlockHash,
+	var withdrawalsRoot common.Root
+	if eth1Block.Withdrawals() != nil {
+		// Compute the SSZ hash-tree-root of the withdrawals,
+		// since that is what we put as withdrawals_root in the CL execution-payload.
+		// Not to be confused with the legacy MPT root in the EL block header.
+		clWithdrawals := make(common.Withdrawals, len(eth1Block.Withdrawals()))
+		for i, withdrawal := range eth1Block.Withdrawals() {
+			clWithdrawals[i] = common.Withdrawal{
+				Index:          common.WithdrawalIndex(withdrawal.Index),
+				ValidatorIndex: common.ValidatorIndex(withdrawal.Validator),
+				Address:        common.Eth1Address(withdrawal.Address),
+				Amount:         common.Gwei(withdrawal.Amount),
+			}
+		}
+		withdrawalsRoot = clWithdrawals.HashTreeRoot(spec, tree.GetHashFn())
+	}
 
-		TransactionsRoot: TxRoot,
+	execHeader = &capella.ExecutionPayloadHeader{
+		ParentHash:       common.Root(eth1Block.ParentHash()),
+		FeeRecipient:     common.Eth1Address(eth1Block.Coinbase()),
+		StateRoot:        common.Bytes32(eth1Block.Root()),
+		ReceiptsRoot:     common.Bytes32(eth1Block.ReceiptHash()),
+		LogsBloom:        common.LogsBloom(eth1Block.Bloom()),
+		PrevRandao:       prevRandaoMix,
+		BlockNumber:      view.Uint64View(eth1Block.NumberU64()),
+		GasLimit:         view.Uint64View(eth1Block.GasLimit()),
+		GasUsed:          view.Uint64View(eth1Block.GasUsed()),
+		Timestamp:        common.Timestamp(eth1Block.Time()),
+		ExtraData:        extra,
+		BaseFeePerGas:    view.Uint256View(*baseFee),
+		BlockHash:        eth1BlockHash,
+		WithdrawalsRoot:  withdrawalsRoot,
+		TransactionsRoot: txsRoot,
 	}
 
 	if err := os.MkdirAll(g.TranchesDir, 0777); err != nil {
