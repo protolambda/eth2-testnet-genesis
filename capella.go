@@ -111,14 +111,14 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 		}
 
 		// Unmarshal the JSON into a types.Block object
-		var resultBlock types.Block
+		var resultBlock JSONData
 		err = json.Unmarshal(file, &resultBlock)
 		if err != nil {
 			return fmt.Errorf("failed to unmarshal JSON: %w", err)
 		}
 
 		// Set the eth1Block value for use later
-		eth1Block = &resultBlock
+		eth1Block = &resultBlock.Result
 
 		// Convert and set the difficulty as the prevRandao field
 		prevRandaoMix = bigIntToBytes32(eth1Block.Difficulty())
