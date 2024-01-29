@@ -24,9 +24,9 @@ import (
 )
 
 type JSONData struct {
-	Jsonrpc string      `json:"jsonrpc"`
-	Id      int         `json:"id"`
-	Result  types.Block `json:"result"`
+	Jsonrpc string          `json:"jsonrpc"`
+	Id      int             `json:"id"`
+	Result  json.RawMessage `json:"result"`
 }
 
 type CapellaGenesisCmd struct {
@@ -80,7 +80,7 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 	var execHeader *capella.ExecutionPayloadHeader
 	var eth1Block *types.Block
 	var prevRandaoMix [32]byte
-	var txsRoot common.Root
+	var txsRoot common.Root = common.PayloadTransactionsType(spec).DefaultNode().MerkleRoot(tree.GetHashFn())
 	var eth1Genesis *core.Genesis
 
 	// Load the Eth1 block from the Eth1 genesis config
@@ -111,14 +111,17 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 		}
 
 		// Unmarshal the JSON into a types.Block object
-		var resultBlock JSONData
-		err = json.Unmarshal(file, &resultBlock)
+		var resultData JSONData
+		err = json.Unmarshal(file, &resultData)
 		if err != nil {
 			return fmt.Errorf("failed to unmarshal JSON: %w", err)
 		}
 
 		// Set the eth1Block value for use later
-		eth1Block = &resultBlock.Result
+		eth1Block, err = ParseEthBlock(resultData.Result)
+		if err != nil {
+			return fmt.Errorf("failed to parse eth1 block: %w", err)
+		}
 
 		// Convert and set the difficulty as the prevRandao field
 		prevRandaoMix = bigIntToBytes32(eth1Block.Difficulty())
@@ -143,18 +146,6 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 		// Convert and set the difficulty as the prevRandao field
 		prevRandaoMix = bigIntToBytes32(eth1Block.Difficulty())
 
-		// Compute the SSZ hash-tree-root of the transactions,
-		// since that is what we put as transactions_root in the CL execution-payload.
-		// Not to be confused with the legacy MPT root in the EL block header.
-		clTransactions := make(common.PayloadTransactions, len(eth1Block.Transactions()))
-		for i, tx := range eth1Block.Transactions() {
-			opaqueTx, err := tx.MarshalBinary()
-			if err != nil {
-				return fmt.Errorf("failed to encode tx %d: %w", i, err)
-			}
-			clTransactions[i] = opaqueTx
-		}
-		txsRoot = clTransactions.HashTreeRoot(spec, tree.GetHashFn())
 	} else if g.Eth1Config != "" {
 
 		// Generate genesis block from the loaded config
@@ -162,7 +153,6 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 		// Set as default values
 		prevRandaoMix = common.Bytes32{}
-		txsRoot = common.PayloadTransactionsType(spec).DefaultNode().MerkleRoot(tree.GetHashFn())
 
 	} else {
 		fmt.Println("no eth1 config found, using eth1 block hash and timestamp, with empty ExecutionPayloadHeader (no PoW->PoS transition yet in execution layer)")
@@ -194,6 +184,21 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 			}
 		}
 		withdrawalsRoot = clWithdrawals.HashTreeRoot(spec, tree.GetHashFn())
+	}
+
+	if len(eth1Block.Transactions()) > 0 {
+		// Compute the SSZ hash-tree-root of the transactions,
+		// since that is what we put as transactions_root in the CL execution-payload.
+		// Not to be confused with the legacy MPT root in the EL block header.
+		clTransactions := make(common.PayloadTransactions, len(eth1Block.Transactions()))
+		for i, tx := range eth1Block.Transactions() {
+			opaqueTx, err := tx.MarshalBinary()
+			if err != nil {
+				return fmt.Errorf("failed to encode tx %d: %w", i, err)
+			}
+			clTransactions[i] = opaqueTx
+		}
+		txsRoot = clTransactions.HashTreeRoot(spec, tree.GetHashFn())
 	}
 
 	execHeader = &capella.ExecutionPayloadHeader{
