@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"os"
@@ -22,6 +23,12 @@ import (
 	"github.com/protolambda/ztyp/view"
 )
 
+type JSONData struct {
+	Jsonrpc string      `json:"jsonrpc"`
+	Id      int         `json:"id"`
+	Result  types.Block `json:"result"`
+}
+
 type CapellaGenesisCmd struct {
 	configs.SpecOptions `ask:"."`
 	Eth1Config          string `ask:"--eth1-config" help:"Path to config JSON for eth1. No transition yet if empty."`
@@ -38,6 +45,7 @@ type CapellaGenesisCmd struct {
 
 	EthWithdrawalAddress common.Eth1Address `ask:"--eth1-withdrawal-address" help:"Eth1 Withdrawal to set for the genesis validator set"`
 	ShadowForkEth1RPC    string             `ask:"--shadow-fork-eth1-rpc" help:"Fetch the Eth1 block from the eth1 node for the shadow fork"`
+	ShadowForkBlockFile  string             `ask:"--shadow-fork-block-file" help:"Fetch the Eth1 block from a file for the shadow fork(overwrites RPC option)"`
 }
 
 func (g *CapellaGenesisCmd) Help() string {
@@ -56,6 +64,7 @@ func (g *CapellaGenesisCmd) Default() {
 	g.StateOutputPath = "genesis.ssz"
 	g.TranchesDir = "tranches"
 	g.ShadowForkEth1RPC = ""
+	g.ShadowForkBlockFile = ""
 }
 
 func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
@@ -94,7 +103,27 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 		beaconGenesisTimestamp = g.Eth1BlockTimestamp
 	}
 
-	if g.ShadowForkEth1RPC != "" {
+	if g.ShadowForkBlockFile != "" {
+		// Read the JSON file from disk
+		file, err := os.ReadFile(g.ShadowForkBlockFile)
+		if err != nil {
+			return fmt.Errorf("failed to read file: %w", err)
+		}
+
+		// Unmarshal the JSON into a types.Block object
+		var resultBlock types.Block
+		err = json.Unmarshal(file, &resultBlock)
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal JSON: %w", err)
+		}
+
+		// Set the eth1Block value for use later
+		eth1Block = &resultBlock
+
+		// Convert and set the difficulty as the prevRandao field
+		prevRandaoMix = bigIntToBytes32(eth1Block.Difficulty())
+
+	} else if g.ShadowForkEth1RPC != "" {
 		client, err := ethclient.Dial(g.ShadowForkEth1RPC)
 		if err != nil {
 			return fmt.Errorf("A fatal error occurred creating the ETH client %s", err)
