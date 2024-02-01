@@ -19,7 +19,7 @@ require (
 	github.com/DataDog/zstd v1.5.5 // indirect
 	github.com/VictoriaMetrics/fastcache v1.12.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bits-and-blooms/bitset v1.9.0 // indirect
+	github.com/bits-and-blooms/bitset v1.10.0 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cockroachdb/errors v1.11.1 // indirect
@@ -28,13 +28,13 @@ require (
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/consensys/bavard v0.1.13 // indirect
 	github.com/consensys/gnark-crypto v0.12.1 // indirect
-	github.com/crate-crypto/go-ipa v0.0.0-20230914135612-d1b03fcb8e58 // indirect
+	github.com/crate-crypto/go-ipa v0.0.0-20231025140028-3c0104f4b233 // indirect
 	github.com/crate-crypto/go-kzg-4844 v0.3.0 // indirect
 	github.com/deckarep/golang-set/v2 v2.3.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/ethereum/c-kzg-4844 v0.3.0 // indirect
+	github.com/ethereum/go-verkle v0.1.1-0.20240119133216-f8289fc59149 // indirect
 	github.com/ferranbt/fastssz v0.1.3 // indirect
-	github.com/gballet/go-verkle v0.1.1-0.20231004173727-0a4e93ed640b // indirect
 	github.com/getsentry/sentry-go v0.24.1 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
@@ -86,7 +86,7 @@ require (
 replace github.com/protolambda/zrnt => github.com/gballet/zrnt v0.10.2-0.20231006074444-a610beb530dd
 
 // is a gigantic
-replace github.com/ethereum/go-ethereum => github.com/gballet/go-ethereum kaustinen-with-shapella
+replace github.com/ethereum/go-ethereum => github.com/gballet/go-ethereum v1.10.24-0.20240201062532-6d7b22c07293
 
 // heap
 replace github.com/cockroachdb/pebble => github.com/cockroachdb/pebble v0.0.0-20230209160836-829675f94811
