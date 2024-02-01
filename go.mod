@@ -86,7 +86,7 @@ require (
 replace github.com/protolambda/zrnt => github.com/gballet/zrnt v0.10.2-0.20231006074444-a610beb530dd
 
 // is a gigantic
-replace github.com/ethereum/go-ethereum => github.com/gballet/go-ethereum v1.10.24-0.20231013092550-f595f9024024
+replace github.com/ethereum/go-ethereum => github.com/gballet/go-ethereum kaustinen-with-shapella
 
 // heap
 replace github.com/cockroachdb/pebble => github.com/cockroachdb/pebble v0.0.0-20230209160836-829675f94811
