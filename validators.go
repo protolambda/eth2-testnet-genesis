@@ -13,12 +13,15 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/protolambda/zrnt/eth2/beacon/common"
-	"github.com/protolambda/zrnt/eth2/beacon/phase0"
 	"github.com/tyler-smith/go-bip39"
-	util "github.com/wealdtech/go-eth2-util"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v3"
+
+	blshd "github.com/protolambda/bls12-381-hd"
+	blsu "github.com/protolambda/bls12-381-util"
+
+	"github.com/protolambda/zrnt/eth2/beacon/common"
+	"github.com/protolambda/zrnt/eth2/beacon/phase0"
 )
 
 func loadValidatorKeys(spec *common.Spec, mnemonicsConfigPath string, validatorsListPath string, tranchesDir string, ethWithdrawalAddress common.Eth1Address) ([]phase0.KickstartValidatorData, error) {
@@ -63,6 +66,8 @@ func generateValidatorKeysByMnemonic(spec *common.Spec, mnemonicsConfigPath stri
 	offset := uint64(0)
 	for m, mnemonicSrc := range mnemonics {
 		var g errgroup.Group
+		g.SetLimit(10_000) // when generating large states, do squeeze processing, but do not go out of memory
+
 		var prog int32
 		fmt.Printf("processing mnemonic %d, for %d validators\n", m, mnemonicSrc.Count)
 		seed, err := seedFromMnemonic(mnemonicSrc.Mnemonic)
@@ -74,24 +79,42 @@ func generateValidatorKeysByMnemonic(spec *common.Spec, mnemonicsConfigPath stri
 			valIndex := offset + i
 			idx := i
 			g.Go(func() error {
-				signingKey, err := util.PrivateKeyFromSeedAndPath(seed, validatorKeyName(idx))
+				signingSK, err := blshd.SecretKeyFromHD(seed, validatorKeyName(idx))
 				if err != nil {
 					return err
 				}
-				withdrawalKey, err := util.PrivateKeyFromSeedAndPath(seed, withdrawalKeyName(idx))
+
+				var blsSK blsu.SecretKey
+				if err := blsSK.Deserialize(signingSK); err != nil {
+					return fmt.Errorf("failed to decode derived secret key: %w", err)
+				}
+				pub, err := blsu.SkToPk(&blsSK)
 				if err != nil {
-					return err
+					return fmt.Errorf("failed to compute pubkey: %w", err)
 				}
 
 				// BLS signing key
 				var data phase0.KickstartValidatorData
-				copy(data.Pubkey[:], signingKey.PublicKey().Marshal())
+				data.Pubkey = pub.Serialize()
 				pubs[idx] = data.Pubkey.String()
 
 				if ethWithdrawalAddress == (common.Eth1Address{}) {
 					// BLS withdrawal credentials
+					withdrawalSK, err := blshd.SecretKeyFromHD(seed, withdrawalKeyName(idx))
+					if err != nil {
+						return err
+					}
+					var withdrawalBlsSK blsu.SecretKey
+					if err := withdrawalBlsSK.Deserialize(withdrawalSK); err != nil {
+						return fmt.Errorf("failed to decode derived secret key: %w", err)
+					}
+					withdrawalPub, err := blsu.SkToPk(&withdrawalBlsSK)
+					if err != nil {
+						return fmt.Errorf("failed to compute pubkey: %w", err)
+					}
+					withdrawalPubBytes := withdrawalPub.Serialize()
 					h := sha256.New()
-					h.Write(withdrawalKey.PublicKey().Marshal())
+					h.Write(withdrawalPubBytes[:])
 					copy(data.WithdrawalCredentials[:], h.Sum(nil))
 					data.WithdrawalCredentials[0] = common.BLS_WITHDRAWAL_PREFIX
 				} else {
@@ -107,8 +130,8 @@ func generateValidatorKeysByMnemonic(spec *common.Spec, mnemonicsConfigPath stri
 				// Max effective balance by default for activation
 				data.Balance = spec.MAX_EFFECTIVE_BALANCE
 				validators[valIndex] = data
-				atomic.AddInt32(&prog, 1)
-				if prog%100 == 0 {
+				count := atomic.AddInt32(&prog, 1)
+				if count%100 == 0 {
 					fmt.Printf("...validator %d/%d\n", prog, mnemonicSrc.Count)
 				}
 				return nil
