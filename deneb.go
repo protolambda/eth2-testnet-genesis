@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/big"
 	"os"
@@ -16,21 +17,15 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 
 	"github.com/protolambda/zrnt/eth2"
-	"github.com/protolambda/zrnt/eth2/beacon/capella"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
+	"github.com/protolambda/zrnt/eth2/beacon/deneb"
 	"github.com/protolambda/zrnt/eth2/configs"
 	"github.com/protolambda/ztyp/codec"
 	"github.com/protolambda/ztyp/tree"
 	"github.com/protolambda/ztyp/view"
 )
 
-type JSONData struct {
-	Jsonrpc string          `json:"jsonrpc"`
-	Id      int             `json:"id"`
-	Result  json.RawMessage `json:"result"`
-}
-
-type CapellaGenesisCmd struct {
+type DenebGenesisCmd struct {
 	configs.SpecOptions `ask:"."`
 	Eth1Config          string `ask:"--eth1-config" help:"Path to config JSON for eth1. No transition yet if empty."`
 
@@ -49,11 +44,11 @@ type CapellaGenesisCmd struct {
 	ShadowForkBlockFile  string             `ask:"--shadow-fork-block-file" help:"Fetch the Eth1 block from a file for the shadow fork(overwrites RPC option)"`
 }
 
-func (g *CapellaGenesisCmd) Help() string {
-	return "Create genesis state for Capella beacon chain, from execution-layer and consensus-layer configs"
+func (g *DenebGenesisCmd) Help() string {
+	return "Create genesis state for Deneb beacon chain, from execution-layer and consensus-layer configs"
 }
 
-func (g *CapellaGenesisCmd) Default() {
+func (g *DenebGenesisCmd) Default() {
 	g.SpecOptions.Default()
 	g.Eth1Config = "engine_genesis.json"
 
@@ -68,7 +63,7 @@ func (g *CapellaGenesisCmd) Default() {
 	g.ShadowForkBlockFile = ""
 }
 
-func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
+func (g *DenebGenesisCmd) Run(ctx context.Context, args ...string) error {
 	fmt.Printf("zrnt version: %s\n", eth2.VERSION)
 
 	spec, err := g.SpecOptions.Spec()
@@ -78,7 +73,7 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 	var eth1BlockHash common.Root
 	var beaconGenesisTimestamp common.Timestamp
-	var execHeader *capella.ExecutionPayloadHeader
+	var execHeader *deneb.ExecutionPayloadHeader
 	var eth1Block *types.Block
 	var prevRandaoMix [32]byte
 	var txsRoot common.Root = common.PayloadTransactionsType(spec).DefaultNode().MerkleRoot(tree.GetHashFn())
@@ -158,7 +153,7 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 	} else {
 		fmt.Println("no eth1 config found, using eth1 block hash and timestamp, with empty ExecutionPayloadHeader (no PoW->PoS transition yet in execution layer)")
 		eth1BlockHash = g.Eth1BlockHash
-		execHeader = &capella.ExecutionPayloadHeader{}
+		execHeader = &deneb.ExecutionPayloadHeader{}
 	}
 
 	eth1BlockHash = common.Root(eth1Block.Hash())
@@ -202,7 +197,14 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 		txsRoot = clTransactions.HashTreeRoot(spec, tree.GetHashFn())
 	}
 
-	execHeader = &capella.ExecutionPayloadHeader{
+	if eth1Block.BlobGasUsed() == nil {
+		return errors.New("execution-layer Block has missing blob-gas-used field")
+	}
+	if eth1Block.ExcessBlobGas() == nil {
+		return errors.New("execution-layer Block has missing excess-blob-gas field")
+	}
+
+	execHeader = &deneb.ExecutionPayloadHeader{
 		ParentHash:       common.Root(eth1Block.ParentHash()),
 		FeeRecipient:     common.Eth1Address(eth1Block.Coinbase()),
 		StateRoot:        common.Bytes32(eth1Block.Root()),
@@ -216,8 +218,10 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 		ExtraData:        extra,
 		BaseFeePerGas:    view.Uint256View(*baseFee),
 		BlockHash:        eth1BlockHash,
-		WithdrawalsRoot:  withdrawalsRoot,
 		TransactionsRoot: txsRoot,
+		WithdrawalsRoot:  withdrawalsRoot,
+		BlobGasUsed:      view.Uint64View(*eth1Block.BlobGasUsed()),
+		ExcessBlobGas:    view.Uint64View(*eth1Block.ExcessBlobGas()),
 	}
 
 	if err := os.MkdirAll(g.TranchesDir, 0777); err != nil {
@@ -233,7 +237,7 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 		fmt.Printf("WARNING: not enough validators for genesis. Key sources sum up to %d total. But need %d.\n", len(validators), spec.MIN_GENESIS_ACTIVE_VALIDATOR_COUNT)
 	}
 
-	state := capella.NewBeaconStateView(spec)
+	state := deneb.NewBeaconStateView(spec)
 	if err := setupState(spec, state, beaconGenesisTimestamp, eth1BlockHash, validators); err != nil {
 		return err
 	}

@@ -6,6 +6,7 @@ import (
 	"github.com/protolambda/zrnt/eth2/beacon/bellatrix"
 	"github.com/protolambda/zrnt/eth2/beacon/capella"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
+	"github.com/protolambda/zrnt/eth2/beacon/deneb"
 	"github.com/protolambda/zrnt/eth2/beacon/phase0"
 	"github.com/protolambda/ztyp/tree"
 )
@@ -19,6 +20,9 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 	var forkVersion common.Version
 	var previousForkVersion common.Version
 	switch state.(type) {
+	case *deneb.BeaconStateView:
+		forkVersion = spec.DENEB_FORK_VERSION
+		previousForkVersion = spec.CAPELLA_FORK_VERSION
 	case *capella.BeaconStateView:
 		forkVersion = spec.CAPELLA_FORK_VERSION
 		previousForkVersion = spec.BELLATRIX_FORK_VERSION
@@ -56,6 +60,8 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 	}
 	var emptyBody tree.HTR
 	switch state.(type) {
+	case *deneb.BeaconStateView:
+		emptyBody = deneb.BeaconBlockBodyType(spec).New()
 	case *capella.BeaconStateView:
 		emptyBody = capella.BeaconBlockBodyType(spec).New()
 	case *bellatrix.BeaconStateView:
@@ -65,6 +71,8 @@ func setupState(spec *common.Spec, state common.BeaconState, eth1Time common.Tim
 	default:
 		emptyBody = phase0.BeaconBlockBodyType(spec).New()
 	}
+	// Setting to a valid BeaconBlockBody HTR has become official test setup behavior in Deneb,
+	// see initialize_beacon_state_from_eth1.
 	latestHeader := &common.BeaconBlockHeader{
 		BodyRoot: emptyBody.HashTreeRoot(tree.GetHashFn()),
 	}

@@ -27,6 +27,7 @@ This repository contains a utility for generating an Eth2 testnet genesis state,
 - `altair`: Create genesis state for Altair beacon chain.
 - `bellatrix`: Create genesis state for Bellatrix beacon chain, from execution-layer (only required if post-transition) and consensus-layer configs.
 - `capella`: Create genesis state for Capella beacon chain, from execution-layer (only required if post-transition) and consensus-layer configs.
+- `deneb`: Create genesis state for Deneb beacon chain, from execution-layer and consensus-layer configs.
 - `version`: Print version and exit.
 
 ### Common Inputs:
@@ -58,6 +59,9 @@ eth2-testnet-genesis capella --config=config.yaml --mnemonics=mnemonics.yaml --e
 ```bash
 eth2-testnet-genesis capella --config=config.yaml --eth1-config="genesis.json" --mnemonics=mnemonics.yaml --shadow-fork-eth1-rpc=http://localhost:8545
 ```
+- For deneb genesis state: like capella, but swap "capella" with "deneb". Options are the same.
+
+*Make sure to set all `--preset-X` (where `X` is an upgrade name) flags when building a genesis for a custom preset (i.e. `minimal` test states).*
 
 ### Extra Details:
 
