@@ -163,10 +163,13 @@ func (g *CapellaGenesisCmd) Run(ctx context.Context, args ...string) error {
 
 	eth1BlockHash = common.Root(eth1Block.Hash())
 
-	extra := eth1Block.Extra()
-	if len(extra) > common.MAX_EXTRA_DATA_BYTES {
-		return fmt.Errorf("extra data is %d bytes, max is %d", len(extra), common.MAX_EXTRA_DATA_BYTES)
+	// Add support for the clique engine to ignore extra data too long
+	extraSize := len(eth1Block.Extra())
+	if extraSize > common.MAX_EXTRA_DATA_BYTES {
+		fmt.Printf("WARNING: extra data too long %d bytes, using the first %d bytes\n", extraSize, common.MAX_EXTRA_DATA_BYTES)
+		extraSize = common.MAX_EXTRA_DATA_BYTES
 	}
+	extra := eth1Block.Extra()[0:extraSize]
 
 	baseFee, _ := uint256.FromBig(eth1Block.BaseFee())
 
