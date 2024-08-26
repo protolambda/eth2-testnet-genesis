@@ -50,8 +50,8 @@ github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5 h1:FtmdgXiUlNeRsoNMFlK
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
 github.com/fsnotify/fsnotify v1.6.0 h1:n+5WquG0fcWoWp6xPWfHdbskMCQaFnG6PfBrh1Ky4HY=
-github.com/gballet/go-ethereum v1.12.1-0.20240718094128-fd79e391806f h1:W7c7dVOHTaGxpsXvB3Y7c4+50zXgcjcbJX68b4juN3Y=
-github.com/gballet/go-ethereum v1.12.1-0.20240718094128-fd79e391806f/go.mod h1:vc0SOdLwJWOldl+cWoUQvC8rEfQrYnRMuFt2B5XfJko=
+github.com/gballet/go-ethereum v1.12.1-0.20240823185824-9b090a3bc7ea h1:OMXTEmf/R003z8kPohe6zgdsJEV+EqykLty1ijVHYqo=
+github.com/gballet/go-ethereum v1.12.1-0.20240823185824-9b090a3bc7ea/go.mod h1:vc0SOdLwJWOldl+cWoUQvC8rEfQrYnRMuFt2B5XfJko=
 github.com/gballet/go-libpcsclite v0.0.0-20190607065134-2772fd86a8ff h1:tY80oXqGNY4FhTFhk+o9oFHGINQ/+vhlm8HFzi6znCI=
 github.com/gballet/zrnt v0.10.2-0.20231006074444-a610beb530dd h1:Gqkg9PgwZJyJxV2G/CeCxAOf/Y2ao3N3I/mUGk4WcNk=
 github.com/gballet/zrnt v0.10.2-0.20231006074444-a610beb530dd/go.mod h1:YBZ9l46fLn0AZUguvP9eJCgPhDcFOPSB6+MEaCm5K4A=
