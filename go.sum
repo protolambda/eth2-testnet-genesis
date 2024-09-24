@@ -46,12 +46,11 @@ github.com/ethereum/go-verkle v0.1.1-0.20240306133620-7d920df305f0 h1:KrE8I4reeV
 github.com/ethereum/go-verkle v0.1.1-0.20240306133620-7d920df305f0/go.mod h1:D9AJLVXSyZQXJQVk8oh1EwjISE+sJTn2duYIZC0dy3w=
 github.com/ferranbt/fastssz v0.1.3 h1:ZI+z3JH05h4kgmFXdHuR1aWYsgrg7o+Fw7/NCzM16Mo=
 github.com/ferranbt/fastssz v0.1.3/go.mod h1:0Y9TEd/9XuFlh7mskMPfXiI2Dkw4Ddg9EyXt1W7MRvE=
-github.com/fjl/memsize v0.0.0-20190710130421-bcb5799ab5e5 h1:FtmdgXiUlNeRsoNMFlKLDt+S+6hbjVMEW6RGQ7aUf7c=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
 github.com/fsnotify/fsnotify v1.6.0 h1:n+5WquG0fcWoWp6xPWfHdbskMCQaFnG6PfBrh1Ky4HY=
-github.com/gballet/go-ethereum v1.12.1-0.20240827145915-9a8672faf4c4 h1:i9/NjJvmHD8PkfRR8vzd+KopH0cPK28VjDaxMtwxBMs=
-github.com/gballet/go-ethereum v1.12.1-0.20240827145915-9a8672faf4c4/go.mod h1:vc0SOdLwJWOldl+cWoUQvC8rEfQrYnRMuFt2B5XfJko=
+github.com/gballet/go-ethereum v1.12.1-0.20240923185640-9ea37be11a71 h1:LCne2oJcsF3/pXILRrzTF7eUxqIXtViV94+uD0sbwVg=
+github.com/gballet/go-ethereum v1.12.1-0.20240923185640-9ea37be11a71/go.mod h1:MdQxvNTnph9U0N+eYYkU/X3xBVv5moE2JYqF4GyPQBs=
 github.com/gballet/go-libpcsclite v0.0.0-20190607065134-2772fd86a8ff h1:tY80oXqGNY4FhTFhk+o9oFHGINQ/+vhlm8HFzi6znCI=
 github.com/gballet/zrnt v0.10.2-0.20231006074444-a610beb530dd h1:Gqkg9PgwZJyJxV2G/CeCxAOf/Y2ao3N3I/mUGk4WcNk=
 github.com/gballet/zrnt v0.10.2-0.20231006074444-a610beb530dd/go.mod h1:YBZ9l46fLn0AZUguvP9eJCgPhDcFOPSB6+MEaCm5K4A=
