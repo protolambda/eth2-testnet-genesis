@@ -54,6 +54,8 @@ github.com/gballet/go-ethereum v1.12.1-0.20240923185640-9ea37be11a71/go.mod h1:M
 github.com/gballet/go-libpcsclite v0.0.0-20190607065134-2772fd86a8ff h1:tY80oXqGNY4FhTFhk+o9oFHGINQ/+vhlm8HFzi6znCI=
 github.com/gballet/zrnt v0.10.2-0.20231006074444-a610beb530dd h1:Gqkg9PgwZJyJxV2G/CeCxAOf/Y2ao3N3I/mUGk4WcNk=
 github.com/gballet/zrnt v0.10.2-0.20231006074444-a610beb530dd/go.mod h1:YBZ9l46fLn0AZUguvP9eJCgPhDcFOPSB6+MEaCm5K4A=
+github.com/gballet/zrnt v0.10.2-0.20240927102545-5c77207d5f11 h1:dmvcBUr3DJnV15kG8cHHgGFvaaCuCAn8vfjD43Y4Tyk=
+github.com/gballet/zrnt v0.10.2-0.20240927102545-5c77207d5f11/go.mod h1:YBZ9l46fLn0AZUguvP9eJCgPhDcFOPSB6+MEaCm5K4A=
 github.com/getsentry/sentry-go v0.24.1 h1:W6/0GyTy8J6ge6lVCc94WB6Gx2ZuLrgopnn9w8Hiwuk=
 github.com/getsentry/sentry-go v0.24.1/go.mod h1:lc76E2QywIyW8WuBnwl8Lc4bkmQH4+w1gwTf25trprY=
 github.com/go-errors/errors v1.4.2 h1:J6MZopCL4uSllY1OfXM374weqZFFItUbrImctkmUxIA=
