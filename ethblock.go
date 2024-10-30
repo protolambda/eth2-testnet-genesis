@@ -39,16 +39,21 @@ func ParseEthBlock(blockData json.RawMessage) (*types.Block, error) {
 		return nil, fmt.Errorf("failed to unmarshal JSON header: %w", err)
 	}
 
-	var body rpcBlock
-	if err := json.Unmarshal(blockData, &body); err != nil {
+	var bodyRPC rpcBlock
+	if err := json.Unmarshal(blockData, &bodyRPC); err != nil {
 		return nil, err
 	}
 
 	// get transactions
-	txs := make([]*types.Transaction, len(body.Transactions))
-	for idx := range body.Transactions {
-		txs[idx] = body.Transactions[idx].tx
+	txs := make([]*types.Transaction, len(bodyRPC.Transactions))
+	for idx := range bodyRPC.Transactions {
+		txs[idx] = bodyRPC.Transactions[idx].tx
 	}
 
-	return types.NewBlockWithHeader(&resultHeader).WithBody(txs, []*types.Header{}).WithWithdrawals(body.Withdrawals), nil
+	body := types.Body{
+		Transactions: txs,
+		Withdrawals:  bodyRPC.Withdrawals,
+	}
+
+	return types.NewBlockWithHeader(&resultHeader).WithBody(body), nil
 }
