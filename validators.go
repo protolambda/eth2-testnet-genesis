@@ -250,7 +250,7 @@ func loadValidatorsFromFile(spec *common.Spec, validatorsConfigPath string) ([]p
 			break
 		case 0x01, 0x02:
 			if !bytes.Equal(withdrawalCred[1:12], []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}) {
-				return nil, errors.New(fmt.Sprintf("invalid withdrawal credentials (invalid 0x01 cred) on line %v", lineNum))
+				return nil, errors.New(fmt.Sprintf("invalid withdrawal credentials (invalid 0x01 or 0x02 cred) on line %v", lineNum))
 			}
 			break
 		default:
