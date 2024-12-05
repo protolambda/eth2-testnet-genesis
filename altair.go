@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/ethereum/go-ethereum/core"
 	"github.com/protolambda/zrnt/eth2"
 	"github.com/protolambda/zrnt/eth2/beacon/altair"
 	"github.com/protolambda/zrnt/eth2/beacon/common"
@@ -18,6 +19,8 @@ type AltairGenesisCmd struct {
 	configs.SpecOptions   `ask:"."`
 	Eth1BlockHash         common.Root      `ask:"--eth1-block" help:"Eth1 block hash to put into state"`
 	Eth1BlockTimestamp    common.Timestamp `ask:"--timestamp" help:"Eth1 block timestamp"`
+	EthMatchGenesisTime   bool             `ask:"--eth1-match-genesis-time" help:"Use execution-layer genesis time as beacon genesis time. Overrides other genesis time settings."`
+	Eth1Config            string           `ask:"--eth1-config" help:"Path to config JSON for eth1. No transition yet if empty."`
 	MnemonicsSrcFilePath  string           `ask:"--mnemonics" help:"File with YAML of key sources"`
 	ValidatorsSrcFilePath string           `ask:"--additional-validators" help:"File with list of validators"`
 	StateOutputPath       string           `ask:"--state-output" help:"Output path for state file"`
@@ -61,7 +64,27 @@ func (g *AltairGenesisCmd) Run(ctx context.Context, args ...string) error {
 	}
 
 	state := altair.NewBeaconStateView(spec)
-	if err := setupState(spec, state, g.Eth1BlockTimestamp, g.Eth1BlockHash, validators); err != nil {
+
+	var beaconGenesisTimestamp common.Timestamp
+	var eth1Genesis *core.Genesis
+
+	if g.Eth1Config != "" {
+		eth1Genesis, err = loadEth1GenesisConf(g.Eth1Config)
+		if err != nil {
+			return err
+		}
+	}
+
+	if g.EthMatchGenesisTime && eth1Genesis != nil {
+		beaconGenesisTimestamp = common.Timestamp(eth1Genesis.Timestamp)
+	} else if spec.MIN_GENESIS_TIME != 0 {
+		fmt.Println("Using CL MIN_GENESIS_TIME for genesis timestamp")
+		beaconGenesisTimestamp = spec.MIN_GENESIS_TIME
+	} else {
+		beaconGenesisTimestamp = g.Eth1BlockTimestamp
+	}
+
+	if err := setupState(spec, state, beaconGenesisTimestamp, g.Eth1BlockHash, validators); err != nil {
 		return err
 	}
 
@@ -69,7 +92,7 @@ func (g *AltairGenesisCmd) Run(ctx context.Context, args ...string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("genesis at %d + %d = %d  (%s)\n", g.Eth1BlockTimestamp, spec.GENESIS_DELAY, t, time.Unix(int64(t), 0).String())
+	fmt.Printf("genesis at %d + %d = %d  (%s)\n", beaconGenesisTimestamp, spec.GENESIS_DELAY, t, time.Unix(int64(t), 0).String())
 
 	fmt.Println("done preparing state, serializing SSZ now...")
 	f, err := os.OpenFile(g.StateOutputPath, os.O_CREATE|os.O_WRONLY, 0777)
