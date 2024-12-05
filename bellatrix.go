@@ -26,8 +26,9 @@ type BellatrixGenesisCmd struct {
 	configs.SpecOptions `ask:"."`
 	Eth1Config          string `ask:"--eth1-config" help:"Path to config JSON for eth1. No transition yet if empty."`
 
-	Eth1BlockHash      common.Root      `ask:"--eth1-block" help:"If not transitioned: Eth1 block hash to put into state."`
-	Eth1BlockTimestamp common.Timestamp `ask:"--eth1-timestamp" help:"If not transitioned: Eth1 block timestamp"`
+	Eth1BlockHash       common.Root      `ask:"--eth1-block" help:"If not transitioned: Eth1 block hash to put into state."`
+	Eth1BlockTimestamp  common.Timestamp `ask:"--timestamp" help:"Eth1 block timestamp"`
+	EthMatchGenesisTime bool             `ask:"--eth1-match-genesis-time" help:"Use execution-layer genesis time as beacon genesis time. Overrides other genesis time settings."`
 
 	MnemonicsSrcFilePath  string `ask:"--mnemonics" help:"File with YAML of key sources"`
 	ValidatorsSrcFilePath string `ask:"--additional-validators" help:"File with list of validators"`
@@ -80,11 +81,10 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 		}
 	}
 
-	// Load the genesis timestamp from the CL config, this is better in terms of compatibility for shadowforks
-	if spec.MIN_GENESIS_TIME != 0 {
+	if g.EthMatchGenesisTime && eth1Genesis != nil {
+		beaconGenesisTimestamp = common.Timestamp(eth1Genesis.Timestamp)
+	} else if spec.MIN_GENESIS_TIME != 0 {
 		fmt.Println("Using CL MIN_GENESIS_TIME for genesis timestamp")
-
-		// Set beaconchain genesis timestamp based on config genesis timestamp
 		beaconGenesisTimestamp = spec.MIN_GENESIS_TIME
 	} else {
 		beaconGenesisTimestamp = g.Eth1BlockTimestamp
@@ -181,7 +181,7 @@ func (g *BellatrixGenesisCmd) Run(ctx context.Context, args ...string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("eth2 genesis at %d + %d = %d  (%s)\n", beaconGenesisTimestamp, spec.GENESIS_DELAY, t, time.Unix(int64(t), 0).String())
+	fmt.Printf("genesis at %d + %d = %d  (%s)\n", beaconGenesisTimestamp, spec.GENESIS_DELAY, t, time.Unix(int64(t), 0).String())
 
 	fmt.Println("done preparing state, serializing SSZ now...")
 	f, err := os.OpenFile(g.StateOutputPath, os.O_CREATE|os.O_WRONLY, 0777)
