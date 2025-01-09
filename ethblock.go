@@ -50,5 +50,9 @@ func ParseEthBlock(blockData json.RawMessage) (*types.Block, error) {
 		txs[idx] = body.Transactions[idx].tx
 	}
 
-	return types.NewBlockWithHeader(&resultHeader).WithBody(txs, []*types.Header{}).WithWithdrawals(body.Withdrawals), nil
+	return types.NewBlockWithHeader(&resultHeader).WithBody(types.Body{
+		Transactions: txs,
+		Uncles:       nil,
+		Withdrawals:  body.Withdrawals,
+	}), nil
 }
