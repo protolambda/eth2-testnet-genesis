@@ -28,6 +28,7 @@ This repository contains a utility for generating an Eth2 testnet genesis state,
 - `bellatrix`: Create genesis state for Bellatrix beacon chain, from execution-layer (only required if post-transition) and consensus-layer configs.
 - `capella`: Create genesis state for Capella beacon chain, from execution-layer (only required if post-transition) and consensus-layer configs.
 - `deneb`: Create genesis state for Deneb beacon chain, from execution-layer and consensus-layer configs.
+- `electra`: Create genesis state for Electra beacon chain, from execution-layer and consensus-layer configs.
 - `version`: Print version and exit.
 
 ### Common Inputs:

@@ -26,6 +26,8 @@ func (c *GenesisCmd) Cmd(route string) (cmd interface{}, err error) {
 		cmd = &CapellaGenesisCmd{}
 	case "deneb":
 		cmd = &DenebGenesisCmd{}
+	case "electra":
+		cmd = &ElectraGenesisCmd{}
 	case "version":
 		cmd = &VersionCmd{}
 	default:
@@ -35,7 +37,7 @@ func (c *GenesisCmd) Cmd(route string) (cmd interface{}, err error) {
 }
 
 func (c *GenesisCmd) Routes() []string {
-	return []string{"phase0", "altair", "bellatrix", "capella", "deneb", "version"}
+	return []string{"phase0", "altair", "bellatrix", "capella", "deneb", "electra", "version"}
 }
 
 func main() {
