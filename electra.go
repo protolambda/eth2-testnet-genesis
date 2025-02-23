@@ -257,10 +257,10 @@ func (g *ElectraGenesisCmd) Run(ctx context.Context, args ...string) error {
 	earliestExitEpoch := spec.ComputeActivationExitEpoch(currentEpoch)
 	// we assume no validators with exit epoch, so no earliestExitEpoch change
 	earliestExitEpoch += 1 // in the fork upgrade spec we add 1, so we do that here too...
-	fmt.Printf("earliest exit epoch: %d", earliestExitEpoch)
+	fmt.Printf("earliest exit epoch: %d\n", earliestExitEpoch)
 
 	earliestConsolidationEpoch := spec.ComputeActivationExitEpoch(currentEpoch)
-	fmt.Printf("earliest consolidation epoch: %d", earliestConsolidationEpoch)
+	fmt.Printf("earliest consolidation epoch: %d\n", earliestConsolidationEpoch)
 
 	// To compute the balances:
 	//
